@@ -11,6 +11,14 @@ int main(int argc, char **argv)
 {
 	parseFile("dummy.txt");
 
+	cout << endl;
+
+	//The below code is just to test converting a string to a float
+	string str = "777";
+	float num = atof(str.c_str());	//Convert string to float
+	num = num + 1.2f;
+	cout << num << endl;
+
 	system("pause");
 
 	return 0;
