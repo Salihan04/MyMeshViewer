@@ -18,18 +18,18 @@ int main(int argc, char **argv)
 
 void parseFile(char* fileName)
 {
-	char str[255];
+	string str;
 	ifstream infile;
 	infile.open(fileName);
 
-	if(!infile.is_open())
+	if (!infile.is_open())
 	{
 		cout << "Cannot open dummy.txt" << endl;
 	}
 	
 	while (infile)
 	{
-		infile.getline(str, 255);
+		getline(infile, str);
 		if (infile)
 			cout << str << endl;
 	}
