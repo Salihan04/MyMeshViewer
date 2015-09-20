@@ -9,19 +9,34 @@ using namespace std;
 
 //Function prototypes
 void renderScene();
-void parseFile(char* fileName);
+void parseFile(string fileName);
 
 static int window;
+static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
+
 vector<string> vertices;
 vector<string> faces;
 
 int main(int argc, char **argv)
 {
-	//Parse M file
-	parseFile("TestModels/cap.m");
-	
-	cout << "No. of vertices: " << vertices.size() << endl;
-	cout << "No. of faces: " << faces.size() << endl;
+	for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
+	{
+		string filename = "TestModels/" + testModels[i];
+
+		//Parse M file
+		parseFile(filename);
+
+		//Print info of file
+		cout << "Model: " << testModels[i] << endl;
+		cout << "No. of vertices: " << vertices.size() << endl;
+		cout << "No. of faces: " << faces.size() << endl;
+		cout << endl;
+
+		//Clear vectors
+		vertices.clear();
+		faces.clear();
+	}
+
 	/*
 	//Print data from vertices vector
 	for (int i = 0; i < vertices.size(); i++)
@@ -71,7 +86,7 @@ void renderScene()
 	glutPostRedisplay();
 }
 
-void parseFile(char* fileName)
+void parseFile(string fileName)
 {
 	string str;
 	ifstream infile;
