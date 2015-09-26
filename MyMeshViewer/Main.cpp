@@ -17,6 +17,26 @@ static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eigh
 vector<string> vertices;
 vector<string> faces;
 
+//Half-edge data structures, assuming counter-clockwise orientation
+typedef struct
+{
+	float x, y, z;	//The vertex coordinates
+	HE_edge* edge;	//One of the half-edges emanating from the vertex
+
+}HE_vert;
+typedef struct
+{
+	HE_edge* edge;	//One of the half-edges bordering the face
+}HE_face;
+typedef struct
+{
+	HE_vert* vert;	//Vertex at the end of the half-edge
+	HE_edge* pair;	//Oppositely oriented half-edge
+	HE_face* face;	//The incident face
+	HE_edge* prev;	//Previous half-edge around the face
+	HE_edge* next;	//Next half-edge around the face
+}HE_edge;
+
 int main(int argc, char **argv)
 {
 	for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
