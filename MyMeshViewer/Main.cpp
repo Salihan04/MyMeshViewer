@@ -14,65 +14,64 @@ void parseFile(string fileName);
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
 
-vector<string> vertices;
-vector<string> faces;
-
 //Half-edge data structures, assuming counter-clockwise orientation
 typedef struct
 {
 	float x, y, z;	//The vertex coordinates
-	HE_edge* edge;	//One of the half-edges emanating from the vertex
-
+}Vertex;
+typedef struct
+{
+	Vertex* vert1, vert2, vert3;
+}Face;
+typedef struct
+{
+	Vertex* vert;
+	Face* face;
+}HalfEdge;
+typedef struct
+{
+	Vertex* vert;
+	HalfEdge* he;
 }HE_vert;
 typedef struct
 {
-	HE_edge* edge;	//One of the half-edges bordering the face
+	Face* face;
+	HalfEdge* he;
 }HE_face;
 typedef struct
 {
 	HE_vert* vert;	//Vertex at the end of the half-edge
-	HE_edge* pair;	//Oppositely oriented half-edge
+	HalfEdge* pair;	//Oppositely oriented half-edge
 	HE_face* face;	//The incident face
-	HE_edge* prev;	//Previous half-edge around the face
-	HE_edge* next;	//Next half-edge around the face
+	HalfEdge* prev;	//Previous half-edge around the face
+	HalfEdge* next;	//Next half-edge around the face
 }HE_edge;
+
+vector<Vertex*> vertices;
+vector<Face*> faces;
 
 int main(int argc, char **argv)
 {
-	for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
-	{
-		string filename = "TestModels/" + testModels[i];
+	//for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
+	//{
+	//	string filename = "TestModels/" + testModels[i];
 
-		//Parse M file
-		parseFile(filename);
+	//	//Parse M file
+	//	parseFile(filename);
 
-		//Print info of file
-		cout << "Model: " << testModels[i] << endl;
-		cout << "No. of vertices: " << vertices.size() << endl;
-		cout << "No. of faces: " << faces.size() << endl;
-		cout << endl;
+	//	//Print info of file
+	//	cout << "Model: " << testModels[i] << endl;
+	//	cout << "No. of vertices: " << vertices.size() << endl;
+	//	cout << "No. of faces: " << faces.size() << endl;
+	//	cout << endl;
 
-		//Clear vectors
-		vertices.clear();
-		faces.clear();
-	}
+	//	//Clear vectors
+	//	vertices.clear();
+	//	faces.clear();
+	//}
 
-	/*
-	//Print data from vertices vector
-	for (int i = 0; i < vertices.size(); i++)
-		cout << vertices.at(i) << endl;
-	//Print data from faces vector
-	for (int i = 0; i < faces.size(); i++)
-		cout << faces.at(i) << endl;
-	*/
-
-	/*
-	//The below code is just to test converting a string to a float
-	string str = "777";
-	float num = atof(str.c_str());	//Convert string to float
-	num = num + 1.2f;
-	cout << num << endl;
-	*/
+	cout << "Cap" << endl;
+	parseFile("TestModels/cap.m");
 
 	//Initialising Glut
 	glutInit(&argc, argv);
@@ -126,10 +125,47 @@ void parseFile(string fileName)
 		{
 			//If the line begins with 'Vertex', add to vertices vector
 			if (str[0] == 'V')
-				vertices.push_back(str);
+			{
+				int i = 10;
+				int j = 0;
+				string temp = "";
+				Vertex* v = new Vertex();
+				float coords[3];
+				for (int i = 10; i < str.length(); i++)
+				{
+					if (str[i] == ' ')
+					{
+						if (temp != "")
+						{
+							coords[j] = atof(temp.c_str());
+							j++;
+							temp = "";
+						}
+						else
+						{
+							continue;
+						}
+					}
+					else
+					{
+						temp += str[i];
+					}
+				}
+				if (temp != "")
+				{
+					coords[j] = atof(temp.c_str());
+					j = 0;
+					temp = "";
+				}
+				v->x = coords[0];
+				v->y = coords[1];
+				v->z = coords[2];
+				vertices.push_back(v);
+				cout << v->x << "," << v->y << "," << v->z << endl;
+			}
 			//If the line begins with 'Face', add to faces vector
-			else if (str[0] == 'F')
-				faces.push_back(str);
+			//else if (str[0] == 'F')
+				//faces.push_back(str);
 		}
 	}
 
