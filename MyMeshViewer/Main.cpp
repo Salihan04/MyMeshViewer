@@ -10,6 +10,7 @@ using namespace std;
 //Function prototypes
 void renderScene();
 void parseFile(string fileName);
+void populateVertices(vector<string> vertices_string);
 
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
@@ -47,6 +48,8 @@ typedef struct
 	HalfEdge* next;	//Next half-edge around the face
 }HE_edge;
 
+vector<string> vertices_string;
+vector<string> faces_string;
 vector<Vertex*> vertices;
 vector<Face*> faces;
 
@@ -72,6 +75,8 @@ int main(int argc, char **argv)
 
 	cout << "Cap" << endl;
 	parseFile("TestModels/cap.m");
+	populateVertices(vertices_string);
+	vertices_string.clear();
 
 	//Initialising Glut
 	glutInit(&argc, argv);
@@ -125,50 +130,56 @@ void parseFile(string fileName)
 		{
 			//If the line begins with 'Vertex', add to vertices vector
 			if (str[0] == 'V')
-			{
-				int i = 10;
-				int j = 0;
-				string temp = "";
-				Vertex* v = new Vertex();
-				float coords[3];
-				for (int i = 10; i < str.length(); i++)
-				{
-					if (str[i] == ' ')
-					{
-						if (temp != "")
-						{
-							coords[j] = atof(temp.c_str());
-							j++;
-							temp = "";
-						}
-						else
-						{
-							continue;
-						}
-					}
-					else
-					{
-						temp += str[i];
-					}
-				}
-				if (temp != "")
-				{
-					coords[j] = atof(temp.c_str());
-					j = 0;
-					temp = "";
-				}
-				v->x = coords[0];
-				v->y = coords[1];
-				v->z = coords[2];
-				vertices.push_back(v);
-				cout << v->x << "," << v->y << "," << v->z << endl;
-			}
+				vertices_string.push_back(str);
 			//If the line begins with 'Face', add to faces vector
 			//else if (str[0] == 'F')
-				//faces.push_back(str);
+				faces_string.push_back(str);
 		}
 	}
 
 	//Close file
 	infile.close();
+}
+
+void populateVertices(vector<string> vertices_string)
+{
+	for (int n = 0; n < vertices_string.size(); n++)
+	{
+		int i = 10;
+		int j = 0;
+		string temp = "";
+		Vertex* v = new Vertex();
+		float coords[3];
+		for (int i = 10; i < vertices_string.at(n).length(); i++)
+		{
+			if (vertices_string.at(n)[i] == ' ')
+			{
+				if (temp != "")
+				{
+					coords[j] = atof(temp.c_str());
+					j++;
+					temp = "";
+				}
+				else
+				{
+					continue;
+				}
+			}
+			else
+			{
+				temp += vertices_string.at(n)[i];
+			}
+		}
+		if (temp != "")
+		{
+			coords[j] = atof(temp.c_str());
+			j = 0;
+			temp = "";
+		}
+		v->x = coords[0];
+		v->y = coords[1];
+		v->z = coords[2];
+		vertices.push_back(v);
+		cout << v->x << "," << v->y << "," << v->z << endl;
+	}
 }
