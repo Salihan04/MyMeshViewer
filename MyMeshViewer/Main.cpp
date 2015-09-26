@@ -59,23 +59,25 @@ vector<Face*> faces;
 
 int main(int argc, char **argv)
 {
-	//for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
-	//{
-	//	string filename = "TestModels/" + testModels[i];
+	/*
+	for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
+	{
+		string filename = "TestModels/" + testModels[i];
 
-	//	//Parse M file
-	//	parseFile(filename);
+		//Parse M file
+		parseFile(filename);
 
-	//	//Print info of file
-	//	cout << "Model: " << testModels[i] << endl;
-	//	cout << "No. of vertices: " << vertices.size() << endl;
-	//	cout << "No. of faces: " << faces.size() << endl;
-	//	cout << endl;
+		//Print info of file
+		cout << "Model: " << testModels[i] << endl;
+		cout << "No. of vertices: " << vertices.size() << endl;
+		cout << "No. of faces: " << faces.size() << endl;
+		cout << endl;
 
-	//	//Clear vectors
-	//	vertices.clear();
-	//	faces.clear();
-	//}
+		//Clear vectors
+		vertices.clear();
+		faces.clear();
+	}
+	*/
 
 //	cout << "Cap" << endl;
 	parseFile("TestModels/cap.m");
@@ -118,6 +120,7 @@ void renderScene()
 	glutPostRedisplay();
 }
 
+//Function to read from model file and separate the strings for Vertex and Face
 void parseFile(string fileName)
 {
 	string str;
