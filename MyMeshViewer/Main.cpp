@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "glut.h"
 
@@ -30,18 +31,17 @@ typedef struct
 }Face;
 typedef struct
 {
-	Vertex* vert;
-	Face* face;
+	Vertex* vert;	//Vertex at the end of the half-edge
+	Face* face;		//The incident face
 }HalfEdge;
 typedef struct
 {
-	Vertex* vert;
-	HalfEdge* he;
+	float x, y, z;	//The vertex coordinates
+	HalfEdge* he;	//One of the half-edges emanating from the vertex
 }HE_vert;
 typedef struct
 {
-	Face* face;
-	HalfEdge* he;
+	HalfEdge* he;	//One of the half-edges bordering the face
 }HE_face;
 typedef struct
 {
@@ -52,10 +52,31 @@ typedef struct
 	HalfEdge* next;	//Next half-edge around the face
 }HE_edge;
 
+//struct HE_edge
+//{
+//	struct HE_vert *vert;
+//	struct HE_edge *pair;
+//	struct HE_face *face;
+//	struct HE_edge *prev;
+//	struct HE_edge *next;
+//};
+//struct HE_face
+//{
+//	HE_edge *edge;
+//};
+//struct HE_vert
+//{
+//	float x, y, z;
+//	HE_edge *edge;
+//};
+
 vector<string> vertices_string;
 vector<string> faces_string;
 vector<Vertex*> vertices;
 vector<Face*> faces;
+vector<HE_vert*> HE_verts;
+vector<HE_face*> HE_faces;
+vector<HE_edge*> HE_edges;
 
 int main(int argc, char **argv)
 {
@@ -112,7 +133,7 @@ void renderScene()
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0, 0.0, 1.0, 1.0);	//Blue background
+	glClearColor(0.0, 0.0, 0.0, 1.0);	//Black background
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -153,9 +174,12 @@ void parseFile(string fileName)
 }
 
 //Function to populate the vertices vector based on data from model file
+//In the for loops, you will see I used size_t to declare my iterator
+//This is to resolve warnings produced if I declared my iterators with int instead
+//Its a personal preference. I don't like errors and warnings
 void populateVertices()
 {
-	for (int n = 0; n < vertices_string.size(); n++)
+	for (size_t n = 0; n < vertices_string.size(); n++)
 	{
 		int j = 0;
 		float coords[3];
@@ -163,7 +187,7 @@ void populateVertices()
 		Vertex* v = new Vertex();
 
 		//The coordinates typically start at string index 10 till end of string
-		for (int i = 10; i < vertices_string.at(n).length(); i++)
+		for (size_t i = 10; i < vertices_string.at(n).length(); i++)
 		{
 			//Need to take into account of space characters between x, y, and z coordinate
 			//For some vertex, coordinates start at a later string index depending on vertex index
@@ -206,9 +230,12 @@ void populateVertices()
 }
 
 //Function to populate the faces vector based on data from model file
+//In the for loops, you will see I used size_t to declare my iterator
+//This is to resolve warnings produced if I declared my iterators with int instead
+//Its a personal preference. I don't like errors and warnings
 void populateFaces()
 {
-	for (int n = 0; n < faces_string.size(); n++)
+	for (size_t n = 0; n < faces_string.size(); n++)
 	{
 		int j = 0;
 		int vertexIndex[3];
@@ -216,7 +243,7 @@ void populateFaces()
 		Face* f = new Face();
 
 		//The vertex indices typically start at string index 8 till end of string
-		for (int i = 8; i < faces_string.at(n).length(); i++)
+		for (size_t i = 8; i < faces_string.at(n).length(); i++)
 		{
 			//Need to take into account of space characters between vertex indices
 			//For some face, vertex indices start at a later string index depending on face index
@@ -257,6 +284,88 @@ void populateFaces()
 	}
 }
 
+//Function to initialise the half edge data structures
+//In the for loops, you will see I used size_t to declare my iterator
+//This is to resolve warnings produced if I declared my iterators with int instead
+//Its a personal preference. I don't like errors and warnings
+void initHEDataStructs()
+{
+	HalfEdge* he = new HalfEdge();
+	HalfEdge* pair = new HalfEdge();
+	HalfEdge* prev = new HalfEdge();
+	HalfEdge* next = new HalfEdge();
+	HE_vert* vert = new HE_vert();
+	HE_face* face = new HE_face();
+	HE_edge* edge = new HE_edge();
+
+	for (size_t n = 0; n < faces.size(); n++)
+	{
+		Face* f = faces.at(n);
+
+		he->vert = f->v1;
+		he->face = f;
+
+		//Initialising HE_vert
+		vert->x = f->v1->x;
+		vert->y = f->v1->y;
+		vert->z = f->v1->z;
+		vert->he = he;
+		//If HE_verts is empty, append vert
+		if(HE_verts.size() == 0)
+			HE_verts.push_back(vert);
+		//HE_verts is not empty
+		else
+		{
+			//Check that vert is not already in HE_verts before appending
+			if (find(HE_verts.begin(), HE_verts.end(), vert) != HE_verts.end())
+				HE_verts.push_back(vert);
+		}
+
+		//Initialising HE_face
+		face->he = he;
+		//If HE_faces is empty, append face
+		if (HE_faces.size() == 0)
+			HE_faces.push_back(face);
+		//HE_faces is not empty
+		else
+		{
+			//Check that face is not already in HE_faces before appending
+			if (find(HE_faces.begin(), HE_faces.end(), face) != HE_faces.end())
+				HE_faces.push_back(face);
+		}
+
+		//Initialising HE_edge
+		pair->vert = f->v2;
+		for (size_t i = 0; i < faces.size(); i++)
+		{
+			if (faces.at(i)->v1 == pair->vert)
+				pair->face = faces.at(i);
+		}
+
+		next->vert = f->v2;
+		next->face = f;
+
+		prev->vert = f->v3;
+		prev->face = f;
+
+		edge->vert = vert;
+		edge->face = face;
+		edge->pair = pair;
+		edge->prev = prev;
+		edge->next = next;
+		//If HE_edges is empty, append edge
+		if (HE_edges.size() == 0)
+			HE_edges.push_back(edge);
+		//HE_edges is not empty
+		else
+		{
+			//Check that edge is not already in HE_edges before appending
+			if (find(HE_edges.begin(), HE_edges.end(), edge) != HE_edges.end())
+				HE_edges.push_back(edge);
+		}
+	}
+}
+
 //Function to reset vectors
 void resetVectors()
 {
@@ -264,4 +373,7 @@ void resetVectors()
 	faces_string.clear();
 	vertices.clear();
 	faces.clear();
+	HE_verts.clear();
+	HE_faces.clear();
+	HE_edges.clear();
 }
