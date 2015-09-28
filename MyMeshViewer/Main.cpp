@@ -2,18 +2,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "glut.h"
 
 using namespace std;
-
-//Function prototypes
-void renderScene();
-void parseFile(string fileName);
-void populateVertices();
-void populateFaces();
-void resetVectors();
 
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
@@ -36,15 +28,17 @@ typedef struct
 }HalfEdge;
 typedef struct
 {
-	float x, y, z;	//The vertex coordinates
+	Vertex* v;	
 	HalfEdge* he;	//One of the half-edges emanating from the vertex
 }HE_vert;
 typedef struct
 {
+	Face* f;
 	HalfEdge* he;	//One of the half-edges bordering the face
 }HE_face;
 typedef struct
 {
+	HalfEdge* he;
 	HE_vert* vert;	//Vertex at the end of the half-edge
 	HalfEdge* pair;	//Oppositely oriented half-edge
 	HE_face* face;	//The incident face
@@ -76,7 +70,16 @@ vector<Vertex*> vertices;
 vector<Face*> faces;
 vector<HE_vert*> HE_verts;
 vector<HE_face*> HE_faces;
-vector<HE_edge*> HE_edges;
+
+//Function prototypes
+void renderScene();
+void parseFile(string fileName);
+void populateVertices();
+void populateFaces();
+void initHEDataStructs();
+void addToHE_verts(HE_vert* vert);
+void addToHE_faces(HE_face* face);
+void resetVectors();
 
 int main(int argc, char **argv)
 {
@@ -105,6 +108,10 @@ int main(int argc, char **argv)
 	populateVertices();
 	populateFaces();
 
+	initHEDataStructs();
+	cout << "Vertices: " << vertices.size() << "," << HE_verts.size() << endl;
+	cout << "Faces: " << faces.size() << "," << HE_faces.size() << endl;
+
 	//Initialising Glut
 	glutInit(&argc, argv);
 	//Use double buffer to get better results on animation
@@ -124,6 +131,8 @@ int main(int argc, char **argv)
 
 	//Reset vectors
 	resetVectors();
+
+	system("pause");
 
 	return 0;
 }
@@ -173,10 +182,12 @@ void parseFile(string fileName)
 	infile.close();
 }
 
-//Function to populate the vertices vector based on data from model file
-//In the for loops, you will see I used size_t to declare my iterator
-//This is to resolve warnings produced if I declared my iterators with int instead
-//Its a personal preference. I don't like errors and warnings
+/*
+Function to populate the vertices vector based on data from model file
+In the for loops, you will see I used size_t to declare my iterator
+This is to resolve warnings produced if I declared my iterators with int instead
+Its a personal preference. I don't like errors and warnings
+*/
 void populateVertices()
 {
 	for (size_t n = 0; n < vertices_string.size(); n++)
@@ -229,10 +240,12 @@ void populateVertices()
 	}
 }
 
-//Function to populate the faces vector based on data from model file
-//In the for loops, you will see I used size_t to declare my iterator
-//This is to resolve warnings produced if I declared my iterators with int instead
-//Its a personal preference. I don't like errors and warnings
+/*
+Function to populate the faces vector based on data from model file
+In the for loops, you will see I used size_t to declare my iterator
+This is to resolve warnings produced if I declared my iterators with int instead
+Its a personal preference. I don't like errors and warnings
+*/
 void populateFaces()
 {
 	for (size_t n = 0; n < faces_string.size(); n++)
@@ -280,61 +293,43 @@ void populateFaces()
 		f->v1 = vertices.at(vertexIndex[0] - 1);
 		f->v2 = vertices.at(vertexIndex[1] - 1);
 		f->v3 = vertices.at(vertexIndex[2] - 1);
+		faces.push_back(f);
 //		cout << "Face " << f->index << ": " << f->v1->index << "," << f->v2->index << "," << f->v3->index << endl;
 	}
 }
 
-//Function to initialise the half edge data structures
-//In the for loops, you will see I used size_t to declare my iterator
-//This is to resolve warnings produced if I declared my iterators with int instead
-//Its a personal preference. I don't like errors and warnings
+/*
+Function to initialise the half edge data structures
+In the for loops, you will see I used size_t to declare my iterator
+This is to resolve warnings produced if I declared my iterators with int instead
+Its a personal preference. I don't like errors and warnings
+*/
 void initHEDataStructs()
 {
-	HalfEdge* he = new HalfEdge();
-	HalfEdge* pair = new HalfEdge();
-	HalfEdge* prev = new HalfEdge();
-	HalfEdge* next = new HalfEdge();
-	HE_vert* vert = new HE_vert();
-	HE_face* face = new HE_face();
-	HE_edge* edge = new HE_edge();
-
 	for (size_t n = 0; n < faces.size(); n++)
 	{
+		HalfEdge* he = new HalfEdge();
+		HalfEdge* pair = new HalfEdge();
+		HalfEdge* prev = new HalfEdge();
+		HalfEdge* next = new HalfEdge();
+		HE_vert* vert = new HE_vert();
+		HE_face* face = new HE_face();
+		HE_edge* edge = new HE_edge();
 		Face* f = faces.at(n);
 
 		he->vert = f->v1;
 		he->face = f;
 
 		//Initialising HE_vert
-		vert->x = f->v1->x;
-		vert->y = f->v1->y;
-		vert->z = f->v1->z;
+		vert->v = f->v1;
 		vert->he = he;
-		//If HE_verts is empty, append vert
-		if(HE_verts.size() == 0)
-			HE_verts.push_back(vert);
-		//HE_verts is not empty
-		else
-		{
-			//Check that vert is not already in HE_verts before appending
-			if (find(HE_verts.begin(), HE_verts.end(), vert) != HE_verts.end())
-				HE_verts.push_back(vert);
-		}
+		addToHE_verts(vert);
 
 		//Initialising HE_face
+		face->f = f;
 		face->he = he;
-		//If HE_faces is empty, append face
-		if (HE_faces.size() == 0)
-			HE_faces.push_back(face);
-		//HE_faces is not empty
-		else
-		{
-			//Check that face is not already in HE_faces before appending
-			if (find(HE_faces.begin(), HE_faces.end(), face) != HE_faces.end())
-				HE_faces.push_back(face);
-		}
+		addToHE_faces(face);
 
-		//Initialising HE_edge
 		pair->vert = f->v2;
 		for (size_t i = 0; i < faces.size(); i++)
 		{
@@ -348,21 +343,121 @@ void initHEDataStructs()
 		prev->vert = f->v3;
 		prev->face = f;
 
+		//Initialising HE_edge
+		edge->he = he;
 		edge->vert = vert;
 		edge->face = face;
 		edge->pair = pair;
 		edge->prev = prev;
 		edge->next = next;
-		//If HE_edges is empty, append edge
-		if (HE_edges.size() == 0)
-			HE_edges.push_back(edge);
-		//HE_edges is not empty
-		else
+
+
+		he = new HalfEdge();
+		vert = new HE_vert();
+		pair = new HalfEdge();
+		prev = new HalfEdge();
+		next = new HalfEdge();
+		edge = new HE_edge();
+
+		he->vert = f->v2;
+		he->face = f;
+
+		vert->v = f->v2;
+		vert->he = he;
+		addToHE_verts(vert);
+
+		pair->vert = f->v3;
+		for (size_t i = 0; i < faces.size(); i++)
 		{
-			//Check that edge is not already in HE_edges before appending
-			if (find(HE_edges.begin(), HE_edges.end(), edge) != HE_edges.end())
-				HE_edges.push_back(edge);
+			if (faces.at(i)->v1 == pair->vert)
+				pair->face = faces.at(i);
 		}
+
+		next->vert = f->v3;
+		next->face = f;
+
+		prev->vert = f->v1;
+		prev->face = f;
+
+		edge->he = he;
+		edge->vert = vert;
+		edge->face = face;
+		edge->pair = pair;
+		edge->prev = prev;
+		edge->next = next;
+
+
+		he = new HalfEdge();
+		vert = new HE_vert();
+		pair = new HalfEdge();
+		prev = new HalfEdge();
+		next = new HalfEdge();
+		edge = new HE_edge();
+
+		he->vert = f->v3;
+		he->face = f;
+
+		vert->v = f->v3;
+		vert->he = he;
+		addToHE_verts(vert);
+
+		pair->vert = f->v1;
+		for (size_t i = 0; i < faces.size(); i++)
+		{
+			if (faces.at(i)->v1 == pair->vert)
+				pair->face = faces.at(i);
+		}
+
+		next->vert = f->v1;
+		next->face = f;
+
+		prev->vert = f->v2;
+		prev->face = f;
+
+		edge->he = he;
+		edge->vert = vert;
+		edge->face = face;
+		edge->pair = pair;
+		edge->prev = prev;
+		edge->next = next;
+	}
+}
+
+//Function to append to HE_verts vector
+void addToHE_verts(HE_vert* vert)
+{
+	//If HE_verts is empty, append vert
+	if (HE_verts.size() == 0)
+		HE_verts.push_back(vert);
+	//HE_verts is not empty
+	else
+	{
+		//Check that vert is not already in HE_verts before appending
+		for (size_t i = 0; i < HE_verts.size(); i++)
+		{
+			if (HE_verts.at(i)->v->index == vert->v->index)
+				return;
+		}
+		HE_verts.push_back(vert);
+	}
+}
+
+//Function to append to HE_faces vector
+void addToHE_faces(HE_face* face)
+{
+	//If HE_faces is empty, append face
+	if (HE_faces.size() == 0)
+		HE_faces.push_back(face);
+	//HE_faces is not empty
+	else
+	{
+		//Check that face is not already in HE_faces before appending
+		for (size_t i = 0; i < HE_faces.size(); i++)
+		{
+			if (HE_faces.at(i)->f->index == face->f->index)
+				return;
+		}
+		HE_faces.push_back(face);
 	}
 }
 
@@ -375,5 +470,4 @@ void resetVectors()
 	faces.clear();
 	HE_verts.clear();
 	HE_faces.clear();
-	HE_edges.clear();
 }
