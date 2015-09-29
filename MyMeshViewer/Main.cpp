@@ -45,24 +45,36 @@ typedef struct
 	HalfEdge* prev;	//Previous half-edge around the face
 	HalfEdge* next;	//Next half-edge around the face
 }HE_edge;
+typedef struct
+{
+	float x, y, z;
+}Vector;
+typedef struct
+{
+	float x, y, z;
+}Normal;
 
-//struct HE_edge
-//{
-//	struct HE_vert *vert;
-//	struct HE_edge *pair;
-//	struct HE_face *face;
-//	struct HE_edge *prev;
-//	struct HE_edge *next;
-//};
-//struct HE_face
-//{
-//	HE_edge *edge;
-//};
-//struct HE_vert
-//{
-//	float x, y, z;
-//	HE_edge *edge;
-//};
+/*
+struct HE_edge
+{
+	struct HE_vert *vert;
+	struct HE_edge *pair;
+	struct HE_face *face;
+	struct HE_edge *prev;
+	struct HE_edge *next;
+};
+struct HE_face
+{
+	int index;
+	HE_edge *edge;
+};
+struct HE_vert
+{
+	int index;
+	float x, y, z;
+	HE_edge *edge;
+};
+*/
 
 vector<string> vertices_string;
 vector<string> faces_string;
@@ -70,6 +82,8 @@ vector<Vertex*> vertices;
 vector<Face*> faces;
 vector<HE_vert*> HE_verts;
 vector<HE_face*> HE_faces;
+vector<Normal*> perFaceNormals;
+vector<Normal*> perVertexNormals;
 
 //Function prototypes
 void renderScene();
@@ -79,6 +93,12 @@ void populateFaces();
 void initHEDataStructs();
 void addToHE_verts(HE_vert* vert);
 void addToHE_faces(HE_face* face);
+Normal* faceNormal(Face* f);
+void initPerFaceNormals();
+vector<Face*> findAdjFaces(Vertex* v);
+float calcFaceArea(Normal* n);
+Normal* vertexNormal(Vertex* v);
+void initPerVertexNormals();
 void resetVectors();
 
 int main(int argc, char **argv)
@@ -458,6 +478,103 @@ void addToHE_faces(HE_face* face)
 				return;
 		}
 		HE_faces.push_back(face);
+	}
+}
+
+Normal* faceNormal(Face* f)
+{
+	Vector* v1 = new Vector();
+	Vector* v2 = new Vector();
+	Normal* n = new Normal();
+
+	v1->x = f->v1->x - f->v2->x;
+	v1->y = f->v1->y - f->v2->y;
+	v1->z = f->v1->z - f->v2->z;
+
+	v2->x = f->v3->x - f->v2->x;
+	v2->y = f->v3->y - f->v2->y;
+	v2->z = f->v3->z - f->v2->z;
+
+	n->x = (v1->y * v2->z) - (v1->z * v2->y);
+	n->y = (v1->z * v2->x) - (v1->x - v2->z);
+	n->z = (v1->x * v2->y) - (v1->y * v2->x);
+
+	return n;
+}
+
+void initPerFaceNormals()
+{
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Normal* n = faceNormal(faces.at(i));
+		perFaceNormals.push_back(n);
+	}
+}
+
+vector<Face*> findAdjFaces(Vertex* v)
+{
+	vector<Face*> adjFaces;
+
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		if ((f->v1->index == v->index) || (f->v2->index == v->index) || (f->v2->index == v->index))
+			adjFaces.push_back(f);
+	}
+
+	return adjFaces;
+}
+
+float calcFaceArea(Normal* n)
+{
+	float length = sqrt((n->x * n->x) + (n->y * n->y) + (n->z * n->z));
+
+	return length / 2;
+}
+
+Normal* vertexNormal(Vertex* v)
+{
+	float totalArea = 0.0f;
+	float faceArea;
+	vector<float> faceAreas;
+	Normal* n = new Normal();
+	n->x = 0.0f;
+	n->y = 0.0f;
+	n->z = 0.0f;
+
+	vector<Face*> adjFaces = findAdjFaces(v);
+
+	for (size_t i = 0; i < adjFaces.size(); i++)
+	{
+		Face* f = adjFaces.at(i);
+		int index = f->index;
+		Normal* faceNormal = perFaceNormals.at(index - 1);
+		faceArea = calcFaceArea(faceNormal);
+		faceAreas.push_back(faceArea);
+		totalArea += faceArea;
+	}
+
+	for (size_t j = 0; j < adjFaces.size(); j++)
+	{
+		Face* f = adjFaces.at(j);
+		int index = f->index;
+		Normal* faceNormal = perFaceNormals.at(index - 1);
+
+		float weight = faceAreas.at(j) / totalArea;
+		n->x += weight * faceNormal->x;
+		n->y += weight * faceNormal->y;
+		n->z += weight * faceNormal->z;
+	}
+
+	return n;
+}
+
+void initPerVertexNormals()
+{
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		Normal* n = vertexNormal(vertices.at(i));
+		perVertexNormals.push_back(n);
 	}
 }
 
