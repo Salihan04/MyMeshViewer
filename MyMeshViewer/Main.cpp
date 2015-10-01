@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "glut.h"
 
@@ -26,7 +27,7 @@ typedef struct
 	Vertex* vert;	//Vertex at the end of the half-edge
 	Face* face;		//The incident face
 }HalfEdge;
-typedef struct
+/*typedef struct
 {
 	Vertex* v;	
 	HalfEdge* he;	//One of the half-edges emanating from the vertex
@@ -44,7 +45,7 @@ typedef struct
 	HE_face* face;	//The incident face
 	HalfEdge* prev;	//Previous half-edge around the face
 	HalfEdge* next;	//Next half-edge around the face
-}HE_edge;
+}HE_edge;*/
 typedef struct
 {
 	float x, y, z;
@@ -54,7 +55,6 @@ typedef struct
 	float x, y, z;
 }Normal;
 
-/*
 struct HE_edge
 {
 	struct HE_vert *vert;
@@ -74,22 +74,26 @@ struct HE_vert
 	float x, y, z;
 	HE_edge *edge;
 };
-*/
 
 vector<string> vertices_string;
 vector<string> faces_string;
 vector<Vertex*> vertices;
 vector<Face*> faces;
-vector<HE_vert*> HE_verts;
-vector<HE_face*> HE_faces;
+//vector<HE_vert*> HE_verts;
+//vector<HE_face*> HE_faces;
 vector<Normal*> perFaceNormals;
 vector<Normal*> perVertexNormals;
+
+map<pair<int, int>, HE_edge*> HE_edges;
+map<int, HE_vert*> HE_verts;
+map<int, HE_face*> HE_faces;
 
 //Function prototypes
 void renderScene();
 void parseFile(string fileName);
 void populateVertices();
 void populateFaces();
+void initHEMaps();
 void initHEDataStructs();
 void addToHE_verts(HE_vert* vert);
 void addToHE_faces(HE_face* face);
@@ -127,10 +131,12 @@ int main(int argc, char **argv)
 	parseFile("TestModels/cap.m");
 	populateVertices();
 	populateFaces();
+	
+	initHEMaps();
 
-	initHEDataStructs();
-	cout << "Vertices: " << vertices.size() << "," << HE_verts.size() << endl;
-	cout << "Faces: " << faces.size() << "," << HE_faces.size() << endl;
+//	initHEDataStructs();
+//	cout << "Vertices: " << vertices.size() << "," << HE_verts.size() << endl;
+//	cout << "Faces: " << faces.size() << "," << HE_faces.size() << endl;
 
 	//Initialising Glut
 	glutInit(&argc, argv);
@@ -318,14 +324,77 @@ void populateFaces()
 	}
 }
 
+void initHEMaps()
+{
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		HE_edge* edge = new HE_edge();
+		HE_face* face = new HE_face();
+		HE_vert* vert = new HE_vert();
+
+		vert->index = f->v1->index;
+		vert->x = f->v1->x;
+		vert->y = f->v1->y;
+		vert->z = f->v1->z;
+		vert->edge = edge;
+		if (HE_verts.count(vert->index) == 0)
+			HE_verts[vert->index] = vert;
+
+		face->index = f->index;
+		face->edge = edge;
+		if (HE_faces.count(f->index) == 0)
+			HE_faces[f->index] = face;
+
+		edge->face = face;
+		if(HE_edges.count(make_pair(f->v1->index, f->v2->index)) == 0)
+			HE_edges[make_pair(f->v1->index, f->v2->index)] = edge;
+
+		edge = new HE_edge();
+		vert = new HE_vert();
+
+		vert->index = f->v2->index;
+		vert->x = f->v2->x;
+		vert->y = f->v2->y;
+		vert->z = f->v2->z;
+		vert->edge = edge;
+		if (HE_verts.count(vert->index) == 0)
+			HE_verts[vert->index] = vert;
+
+		edge->face = face;
+		if (HE_edges.count(make_pair(f->v2->index, f->v3->index)) == 0)
+			HE_edges[make_pair(f->v2->index, f->v3->index)] = edge;
+
+		edge = new HE_edge();
+		vert = new HE_vert();
+
+		vert->index = f->v3->index;
+		vert->x = f->v3->x;
+		vert->y = f->v3->y;
+		vert->z = f->v3->z;
+		vert->edge = edge;
+		if (HE_verts.count(vert->index) == 0)
+			HE_verts[vert->index] = vert;
+
+		edge->face = face;
+		if (HE_edges.count(make_pair(f->v3->index, f->v1->index)) == 0)
+			HE_edges[make_pair(f->v3->index, f->v1->index)] = edge;
+	}
+
+	cout << "HE_verts size: " << HE_verts.size() << endl;
+	cout << "HE_faces size: " << HE_faces.size() << endl;
+	cout << "HE_edges size: " << HE_edges.size() << endl;
+}
+
 /*
 Function to initialise the half edge data structures
 In the for loops, you will see I used size_t to declare my iterator
 This is to resolve warnings produced if I declared my iterators with int instead
 Its a personal preference. I don't like errors and warnings
 */
-void initHEDataStructs()
+void intHEDataStructs()
 {
+	/*
 	for (size_t n = 0; n < faces.size(); n++)
 	{
 		HalfEdge* he = new HalfEdge();
@@ -441,8 +510,16 @@ void initHEDataStructs()
 		edge->prev = prev;
 		edge->next = next;
 	}
+	*/
+
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+
+	}
 }
 
+/*
 //Function to append to HE_verts vector
 void addToHE_verts(HE_vert* vert)
 {
@@ -461,7 +538,9 @@ void addToHE_verts(HE_vert* vert)
 		HE_verts.push_back(vert);
 	}
 }
+*/
 
+/*
 //Function to append to HE_faces vector
 void addToHE_faces(HE_face* face)
 {
@@ -480,6 +559,7 @@ void addToHE_faces(HE_face* face)
 		HE_faces.push_back(face);
 	}
 }
+*/
 
 Normal* faceNormal(Face* f)
 {
