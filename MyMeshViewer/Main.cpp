@@ -91,10 +91,10 @@ map<int, HE_face*> HE_faces;
 //Function prototypes
 void renderScene();
 void parseFile(string fileName);
-void populateVertices();
-void populateFaces();
+void initVertices();
+void initFaces();
 void initHEMaps();
-void initHEDataStructs();
+void assocPairToEdge();
 void addToHE_verts(HE_vert* vert);
 void addToHE_faces(HE_face* face);
 Normal* faceNormal(Face* f);
@@ -129,14 +129,11 @@ int main(int argc, char **argv)
 
 //	cout << "Cap" << endl;
 	parseFile("TestModels/cap.m");
-	populateVertices();
-	populateFaces();
+	initVertices();
+	initFaces();
 	
 	initHEMaps();
-
-//	initHEDataStructs();
-//	cout << "Vertices: " << vertices.size() << "," << HE_verts.size() << endl;
-//	cout << "Faces: " << faces.size() << "," << HE_faces.size() << endl;
+	assocPairToEdge();
 
 	//Initialising Glut
 	glutInit(&argc, argv);
@@ -208,13 +205,8 @@ void parseFile(string fileName)
 	infile.close();
 }
 
-/*
-Function to populate the vertices vector based on data from model file
-In the for loops, you will see I used size_t to declare my iterator
-This is to resolve warnings produced if I declared my iterators with int instead
-Its a personal preference. I don't like errors and warnings
-*/
-void populateVertices()
+//Function to initialise and populate a collection of vertices based on data from model file
+void initVertices()
 {
 	for (size_t n = 0; n < vertices_string.size(); n++)
 	{
@@ -262,17 +254,11 @@ void populateVertices()
 		v->y = coords[1];
 		v->z = coords[2];
 		vertices.push_back(v);
-//		cout << "Vertex " << v->index << ": " << v->x << "," << v->y << "," << v->z << endl;
 	}
 }
 
-/*
-Function to populate the faces vector based on data from model file
-In the for loops, you will see I used size_t to declare my iterator
-This is to resolve warnings produced if I declared my iterators with int instead
-Its a personal preference. I don't like errors and warnings
-*/
-void populateFaces()
+//Function to initialise and populate a collection of faces based on data from model file
+void initFaces()
 {
 	for (size_t n = 0; n < faces_string.size(); n++)
 	{
@@ -320,12 +306,13 @@ void populateFaces()
 		f->v2 = vertices.at(vertexIndex[1] - 1);
 		f->v3 = vertices.at(vertexIndex[2] - 1);
 		faces.push_back(f);
-//		cout << "Face " << f->index << ": " << f->v1->index << "," << f->v2->index << "," << f->v3->index << endl;
 	}
 }
 
+//Function to initialise HE data structures and add them into their respective maps
 void initHEMaps()
 {
+	//Do the below for each face in the model
 	for (size_t i = 0; i < faces.size(); i++)
 	{
 		Face* f = faces.at(i);
@@ -333,248 +320,148 @@ void initHEMaps()
 		HE_face* face = new HE_face();
 		HE_vert* vert = new HE_vert();
 
+		//1st edge
+		//Init starting vertex
 		vert->index = f->v1->index;
 		vert->x = f->v1->x;
 		vert->y = f->v1->y;
 		vert->z = f->v1->z;
 		vert->edge = edge;
+		//Add vertex to HE_verts if it is not already in
 		if (HE_verts.count(vert->index) == 0)
 			HE_verts[vert->index] = vert;
 
+		//Init incident face
 		face->index = f->index;
 		face->edge = edge;
+		//Add face to HE_faces if it is not already in
 		if (HE_faces.count(f->index) == 0)
 			HE_faces[f->index] = face;
 
+		//Init 1st edge
+		edge->vert = vert;
 		edge->face = face;
 		if(HE_edges.count(make_pair(f->v1->index, f->v2->index)) == 0)
 			HE_edges[make_pair(f->v1->index, f->v2->index)] = edge;
 
-		edge = new HE_edge();
+		//2nd edge
+		HE_edge* next = new HE_edge();
 		vert = new HE_vert();
 
+		//Init starting vertex
 		vert->index = f->v2->index;
 		vert->x = f->v2->x;
 		vert->y = f->v2->y;
 		vert->z = f->v2->z;
-		vert->edge = edge;
+		vert->edge = next;
+		//Add vertex to HE_verts if it is not already in
 		if (HE_verts.count(vert->index) == 0)
 			HE_verts[vert->index] = vert;
 
-		edge->face = face;
+		//Init 2nd edge
+		//2nd edge share incident face with 1st and 3rd edge
+		next->vert = vert;
+		next->face = face;
 		if (HE_edges.count(make_pair(f->v2->index, f->v3->index)) == 0)
-			HE_edges[make_pair(f->v2->index, f->v3->index)] = edge;
+			HE_edges[make_pair(f->v2->index, f->v3->index)] = next;
 
-		edge = new HE_edge();
+		//3rd edge
+		HE_edge* prev = new HE_edge();
 		vert = new HE_vert();
 
+		//Init starting vertex
 		vert->index = f->v3->index;
 		vert->x = f->v3->x;
 		vert->y = f->v3->y;
 		vert->z = f->v3->z;
-		vert->edge = edge;
+		vert->edge = prev;
+		//Add vertex to HE_verts if it is not already in
 		if (HE_verts.count(vert->index) == 0)
 			HE_verts[vert->index] = vert;
 
-		edge->face = face;
+		//Init 3rd edge
+		//3rd edge share incident face with 1st and 2nd edge
+		prev->vert = vert;
+		prev->face = face;
 		if (HE_edges.count(make_pair(f->v3->index, f->v1->index)) == 0)
-			HE_edges[make_pair(f->v3->index, f->v1->index)] = edge;
-	}
+			HE_edges[make_pair(f->v3->index, f->v1->index)] = prev;
 
-	cout << "HE_verts size: " << HE_verts.size() << endl;
-	cout << "HE_faces size: " << HE_faces.size() << endl;
-	cout << "HE_edges size: " << HE_edges.size() << endl;
+		//Link up 1st, 2nd, and 3rd edges with each other
+		edge->next = next;
+		edge->prev = prev;
+
+		next->next = prev;
+		next->prev = edge;
+
+		prev->next = edge;
+		prev->prev = next;
+	}
 }
 
-/*
-Function to initialise the half edge data structures
-In the for loops, you will see I used size_t to declare my iterator
-This is to resolve warnings produced if I declared my iterators with int instead
-Its a personal preference. I don't like errors and warnings
-*/
-void intHEDataStructs()
+//Function to associate each edge of each face with its pair
+void assocPairToEdge()
 {
-	/*
-	for (size_t n = 0; n < faces.size(); n++)
-	{
-		HalfEdge* he = new HalfEdge();
-		HalfEdge* pair = new HalfEdge();
-		HalfEdge* prev = new HalfEdge();
-		HalfEdge* next = new HalfEdge();
-		HE_vert* vert = new HE_vert();
-		HE_face* face = new HE_face();
-		HE_edge* edge = new HE_edge();
-		Face* f = faces.at(n);
-
-		he->vert = f->v1;
-		he->face = f;
-
-		//Initialising HE_vert
-		vert->v = f->v1;
-		vert->he = he;
-		addToHE_verts(vert);
-
-		//Initialising HE_face
-		face->f = f;
-		face->he = he;
-		addToHE_faces(face);
-
-		pair->vert = f->v2;
-		for (size_t i = 0; i < faces.size(); i++)
-		{
-			if (faces.at(i)->v1 == pair->vert)
-				pair->face = faces.at(i);
-		}
-
-		next->vert = f->v2;
-		next->face = f;
-
-		prev->vert = f->v3;
-		prev->face = f;
-
-		//Initialising HE_edge
-		edge->he = he;
-		edge->vert = vert;
-		edge->face = face;
-		edge->pair = pair;
-		edge->prev = prev;
-		edge->next = next;
-
-
-		he = new HalfEdge();
-		vert = new HE_vert();
-		pair = new HalfEdge();
-		prev = new HalfEdge();
-		next = new HalfEdge();
-		edge = new HE_edge();
-
-		he->vert = f->v2;
-		he->face = f;
-
-		vert->v = f->v2;
-		vert->he = he;
-		addToHE_verts(vert);
-
-		pair->vert = f->v3;
-		for (size_t i = 0; i < faces.size(); i++)
-		{
-			if (faces.at(i)->v1 == pair->vert)
-				pair->face = faces.at(i);
-		}
-
-		next->vert = f->v3;
-		next->face = f;
-
-		prev->vert = f->v1;
-		prev->face = f;
-
-		edge->he = he;
-		edge->vert = vert;
-		edge->face = face;
-		edge->pair = pair;
-		edge->prev = prev;
-		edge->next = next;
-
-
-		he = new HalfEdge();
-		vert = new HE_vert();
-		pair = new HalfEdge();
-		prev = new HalfEdge();
-		next = new HalfEdge();
-		edge = new HE_edge();
-
-		he->vert = f->v3;
-		he->face = f;
-
-		vert->v = f->v3;
-		vert->he = he;
-		addToHE_verts(vert);
-
-		pair->vert = f->v1;
-		for (size_t i = 0; i < faces.size(); i++)
-		{
-			if (faces.at(i)->v1 == pair->vert)
-				pair->face = faces.at(i);
-		}
-
-		next->vert = f->v1;
-		next->face = f;
-
-		prev->vert = f->v2;
-		prev->face = f;
-
-		edge->he = he;
-		edge->vert = vert;
-		edge->face = face;
-		edge->pair = pair;
-		edge->prev = prev;
-		edge->next = next;
-	}
-	*/
-
 	for (size_t i = 0; i < faces.size(); i++)
 	{
 		Face* f = faces.at(i);
 
-	}
-}
-
-/*
-//Function to append to HE_verts vector
-void addToHE_verts(HE_vert* vert)
-{
-	//If HE_verts is empty, append vert
-	if (HE_verts.size() == 0)
-		HE_verts.push_back(vert);
-	//HE_verts is not empty
-	else
-	{
-		//Check that vert is not already in HE_verts before appending
-		for (size_t i = 0; i < HE_verts.size(); i++)
+		//1st edge
+		HE_edge* edge1 = HE_edges[make_pair(f->v1->index, f->v2->index)];
+		//Check that a pair edge exists
+		if (HE_edges.count(make_pair(f->v2->index, f->v1->index)) > 0)
 		{
-			if (HE_verts.at(i)->v->index == vert->v->index)
-				return;
-		}
-		HE_verts.push_back(vert);
-	}
-}
-*/
+			HE_edge* pair = HE_edges[make_pair(f->v2->index, f->v1->index)];
 
-/*
-//Function to append to HE_faces vector
-void addToHE_faces(HE_face* face)
-{
-	//If HE_faces is empty, append face
-	if (HE_faces.size() == 0)
-		HE_faces.push_back(face);
-	//HE_faces is not empty
-	else
-	{
-		//Check that face is not already in HE_faces before appending
-		for (size_t i = 0; i < HE_faces.size(); i++)
+			//Associate edge and pair with each other
+			edge1->pair = pair;
+			pair->pair = edge1;
+		}
+
+		//2nd edge
+		HE_edge* edge2 = HE_edges[make_pair(f->v2->index, f->v3->index)];
+		//Check that a pair edge exists
+		if (HE_edges.count(make_pair(f->v3->index, f->v2->index)) > 0)
 		{
-			if (HE_faces.at(i)->f->index == face->f->index)
-				return;
+			HE_edge* pair = HE_edges[make_pair(f->v3->index, f->v2->index)];
+
+			//Associate edge and pair with each other
+			edge2->pair = pair;
+			pair->pair = edge2;
 		}
-		HE_faces.push_back(face);
+
+		//3rd edge
+		HE_edge* edge3 = HE_edges[make_pair(f->v3->index, f->v1->index)];
+		//Check that a pair edge exists
+		if (HE_edges.count(make_pair(f->v1->index, f->v3->index)) > 0)
+		{
+			HE_edge* pair = HE_edges[make_pair(f->v1->index, f->v3->index)];
+
+			//Associate edge and pair with each other
+			edge3->pair = pair;
+			pair->pair = edge3;
+		}
 	}
 }
-*/
 
+//Function to find normal of a face
 Normal* faceNormal(Face* f)
 {
 	Vector* v1 = new Vector();
 	Vector* v2 = new Vector();
 	Normal* n = new Normal();
 
+	//Init v1 which is a vector of 1 edge of face
 	v1->x = f->v1->x - f->v2->x;
 	v1->y = f->v1->y - f->v2->y;
 	v1->z = f->v1->z - f->v2->z;
 
+	//Init v2 which is a vector of another edge of face
 	v2->x = f->v3->x - f->v2->x;
 	v2->y = f->v3->y - f->v2->y;
 	v2->z = f->v3->z - f->v2->z;
 
+	//Normal is found by applying cross product on the 2 vectors
+	//Cross product's formula for x, y, and z coordinates as shown below
 	n->x = (v1->y * v2->z) - (v1->z * v2->y);
 	n->y = (v1->z * v2->x) - (v1->x - v2->z);
 	n->z = (v1->x * v2->y) - (v1->y * v2->x);
@@ -582,10 +469,13 @@ Normal* faceNormal(Face* f)
 	return n;
 }
 
+//Function to initialise and populate a collection of per face normals
 void initPerFaceNormals()
 {
+	//For each face
 	for (size_t i = 0; i < faces.size(); i++)
 	{
+		//Find normal and add to collection
 		Normal* n = faceNormal(faces.at(i));
 		perFaceNormals.push_back(n);
 	}
@@ -605,8 +495,11 @@ vector<Face*> findAdjFaces(Vertex* v)
 	return adjFaces;
 }
 
+//Function to calculate the area of each face
 float calcFaceArea(Normal* n)
 {
+	//Length of normal is equivalent to area of parallelogram formed by 2 vectors
+	//Since face is a triangle, area of face is half of length of face's normal
 	float length = sqrt((n->x * n->x) + (n->y * n->y) + (n->z * n->z));
 
 	return length / 2;
@@ -649,10 +542,13 @@ Normal* vertexNormal(Vertex* v)
 	return n;
 }
 
+//Function to initialise and populate a collection of per vertex normals
 void initPerVertexNormals()
 {
+	//For each vertex
 	for (size_t i = 0; i < vertices.size(); i++)
 	{
+		//Find the normal and add to collection
 		Normal* n = vertexNormal(vertices.at(i));
 		perVertexNormals.push_back(n);
 	}
