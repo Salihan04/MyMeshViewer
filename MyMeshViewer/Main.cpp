@@ -481,15 +481,21 @@ void initPerFaceNormals()
 	}
 }
 
+//Function to find the faces adjacent to a vertex
 vector<Face*> findAdjFaces(Vertex* v)
 {
+	HE_vert* vert = HE_verts[v->index];
+	HE_edge* out_edge = vert->edge;
+	HE_edge* curr = out_edge;
 	vector<Face*> adjFaces;
+	
+	adjFaces.push_back(faces.at(curr->face->index - 1));
 
-	for (size_t i = 0; i < faces.size(); i++)
+	//Using one-ring neighbour algo to find and add to collection of adjacent faces
+	while (curr->pair->next != out_edge)
 	{
-		Face* f = faces.at(i);
-		if ((f->v1->index == v->index) || (f->v2->index == v->index) || (f->v2->index == v->index))
-			adjFaces.push_back(f);
+		curr = curr->pair->next;
+		adjFaces.push_back(faces.at(curr->face->index - 1));
 	}
 
 	return adjFaces;
@@ -505,6 +511,7 @@ float calcFaceArea(Normal* n)
 	return length / 2;
 }
 
+//Function to calculate vertex normal
 Normal* vertexNormal(Vertex* v)
 {
 	float totalArea = 0.0f;
@@ -515,25 +522,41 @@ Normal* vertexNormal(Vertex* v)
 	n->y = 0.0f;
 	n->z = 0.0f;
 
+	//Get all faces adjacent to the vertex
 	vector<Face*> adjFaces = findAdjFaces(v);
 
+	//For each adjacent face
 	for (size_t i = 0; i < adjFaces.size(); i++)
 	{
 		Face* f = adjFaces.at(i);
 		int index = f->index;
+
+		//Get the normal of the face
 		Normal* faceNormal = perFaceNormals.at(index - 1);
+
+		//Calculate the area of the face
 		faceArea = calcFaceArea(faceNormal);
+		//Add to collection of face areas
 		faceAreas.push_back(faceArea);
+
+		//Add area of face to totalArea
 		totalArea += faceArea;
 	}
 
+	//Calculate vertex normal
+	//For each face adjacent to vertex
 	for (size_t j = 0; j < adjFaces.size(); j++)
 	{
 		Face* f = adjFaces.at(j);
 		int index = f->index;
+
+		//Get normal of face
 		Normal* faceNormal = perFaceNormals.at(index - 1);
 
+		//Weight is area of 1 face / total area
 		float weight = faceAreas.at(j) / totalArea;
+
+		//Vertex normal is summation of weight * face normal
 		n->x += weight * faceNormal->x;
 		n->y += weight * faceNormal->y;
 		n->z += weight * faceNormal->z;
