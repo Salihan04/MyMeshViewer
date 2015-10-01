@@ -11,7 +11,7 @@ using namespace std;
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
 
-//Half-edge data structures, assuming counter-clockwise orientation
+//Data structures for vertex, face, vector and normal
 typedef struct
 {
 	int index;
@@ -24,37 +24,13 @@ typedef struct
 }Face;
 typedef struct
 {
-	Vertex* vert;	//Vertex at the end of the half-edge
-	Face* face;		//The incident face
-}HalfEdge;
-/*typedef struct
-{
-	Vertex* v;	
-	HalfEdge* he;	//One of the half-edges emanating from the vertex
-}HE_vert;
-typedef struct
-{
-	Face* f;
-	HalfEdge* he;	//One of the half-edges bordering the face
-}HE_face;
-typedef struct
-{
-	HalfEdge* he;
-	HE_vert* vert;	//Vertex at the end of the half-edge
-	HalfEdge* pair;	//Oppositely oriented half-edge
-	HE_face* face;	//The incident face
-	HalfEdge* prev;	//Previous half-edge around the face
-	HalfEdge* next;	//Next half-edge around the face
-}HE_edge;*/
-typedef struct
-{
 	float x, y, z;
 }Vector;
 typedef struct
 {
 	float x, y, z;
 }Normal;
-
+//Half-edge data structures, assuming counter-clockwise orientation
 struct HE_edge
 {
 	struct HE_vert *vert;
@@ -79,8 +55,6 @@ vector<string> vertices_string;
 vector<string> faces_string;
 vector<Vertex*> vertices;
 vector<Face*> faces;
-//vector<HE_vert*> HE_verts;
-//vector<HE_face*> HE_faces;
 vector<Normal*> perFaceNormals;
 vector<Normal*> perVertexNormals;
 
@@ -95,15 +69,13 @@ void initVertices();
 void initFaces();
 void initHEMaps();
 void assocPairToEdge();
-void addToHE_verts(HE_vert* vert);
-void addToHE_faces(HE_face* face);
 Normal* faceNormal(Face* f);
 void initPerFaceNormals();
 vector<Face*> findAdjFaces(Vertex* v);
 float calcFaceArea(Normal* n);
 Normal* vertexNormal(Vertex* v);
 void initPerVertexNormals();
-void resetVectors();
+void clearData();
 
 int main(int argc, char **argv)
 {
@@ -127,13 +99,21 @@ int main(int argc, char **argv)
 	}
 	*/
 
-//	cout << "Cap" << endl;
+	//Reset data
+	clearData();
+
+	//Initialise data needed for rendering
 	parseFile("TestModels/cap.m");
 	initVertices();
 	initFaces();
 	
+	//Initialise half-edge data structures
 	initHEMaps();
 	assocPairToEdge();
+
+	//Initialise per face normals and per vertex normals
+	initPerFaceNormals();
+	initPerVertexNormals();
 
 	//Initialising Glut
 	glutInit(&argc, argv);
@@ -141,19 +121,17 @@ int main(int argc, char **argv)
 	//Use depth buffer for hidden surface removal
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
-	glutInitWindowSize(500, 500);
+	//Initialise window size and position
+	glutInitWindowSize(600, 600);
 	glutInitWindowPosition(100, 100);
 
 	//Create window with OpenGL
-	window = glutCreateWindow("Muhammad Salihan Bin Zaol-kefli, CZ4004 MeshViewer");
+	window = glutCreateWindow("CZ4004 MeshViewer (Muhammad Salihan Bin Zaol-kefli)");
 
 	//Register callbacks
 	glutDisplayFunc(renderScene);
 
 	glutMainLoop();
-
-	//Reset vectors
-	resetVectors();
 
 	system("pause");
 
@@ -492,7 +470,7 @@ vector<Face*> findAdjFaces(Vertex* v)
 	adjFaces.push_back(faces.at(curr->face->index - 1));
 
 	//Using one-ring neighbour algo to find and add to collection of adjacent faces
-	while (curr->pair->next != out_edge)
+	while ((curr->pair != NULL) && (curr->pair->next != out_edge))
 	{
 		curr = curr->pair->next;
 		adjFaces.push_back(faces.at(curr->face->index - 1));
@@ -577,13 +555,19 @@ void initPerVertexNormals()
 	}
 }
 
-//Function to reset vectors
-void resetVectors()
+//Function to clear vectors and maps
+void clearData()
 {
+	//Clear vectors
 	vertices_string.clear();
 	faces_string.clear();
 	vertices.clear();
 	faces.clear();
+	perFaceNormals.clear();
+	perVertexNormals.clear();
+
+	//Clear maps
 	HE_verts.clear();
 	HE_faces.clear();
+	HE_edges.clear();
 }
