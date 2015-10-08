@@ -11,6 +11,8 @@ using namespace std;
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
 
+float minX, minY, minZ, maxX, maxY, maxZ;
+
 //Data structures for vertex, face, vector and normal
 typedef struct
 {
@@ -78,6 +80,8 @@ void initPerVertexNormals();
 void clearData();
 void drawGround();
 void drawAxes();
+void findBoundingVolDimensions();
+void drawBoundingVol();
 
 int main(int argc, char **argv)
 {
@@ -117,6 +121,8 @@ int main(int argc, char **argv)
 	initPerFaceNormals();
 	initPerVertexNormals();
 
+	findBoundingVolDimensions();
+
 	//Initialising Glut
 	glutInit(&argc, argv);
 	//Use double buffer to get better results on animation
@@ -148,6 +154,7 @@ void renderScene()
 	glLoadIdentity();
 	drawGround();
 	drawAxes();
+	drawBoundingVol();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -616,7 +623,7 @@ void drawAxes()
 	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.0f, 0.4f, 0.0f);
+	glTranslatef(0.0f, 0.5f, 0.0f);
 	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
 	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
@@ -632,7 +639,7 @@ void drawAxes()
 	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.4f, 0.0f, 0.0f);
+	glTranslatef(0.5f, 0.0f, 0.0f);
 	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
 	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
@@ -646,9 +653,90 @@ void drawAxes()
 	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, 0.4f);
+	glTranslatef(0.0f, 0.0f, 0.5f);
 	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
 	glutSolidCone(0.3, 0.1, 32, 32);
+	glPopMatrix();
+}
+
+//Function to find the dimensions of the bounding volume to enclose the model renderred
+void findBoundingVolDimensions()
+{
+	minX = minY = minZ = maxX = maxY = maxZ = 0.0f;
+
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		Vertex* v = vertices.at(i);
+		if (v->x < minX)
+			minX = v->x;
+		if (v->x > maxX)
+			maxX = v->x;
+
+		if (v->y < minY)
+			minY = v->y;
+		if (v->y > maxY)
+			maxY = v->y;
+
+		if (v->z < minZ)
+			minZ = v->z;
+		if (v->z > maxZ)
+			maxZ = v->z;
+	}
+
+	cout << "MinX: " << minX << ", MaxX: " << maxX << endl;
+	cout << "MinY: " << minY << ", MaxY: " << maxY << endl;
+	cout << "MinZ: " << minZ << ", MaxZ: " << maxZ << endl;
+}
+
+//Function to draw the bounding volume to enclose the model renderred
+void drawBoundingVol()
+{
+	glPushMatrix();
+//	glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+	//Back face
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(minX, minY, minZ);
+	glVertex3f(maxX, minY, minZ);
+	glVertex3f(maxX, maxY, minZ);
+	glVertex3f(minX, maxY, minZ);
+	glEnd();
+	//Front face
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(minX, minY, maxZ);
+	glVertex3f(maxX, minY, maxZ);
+	glVertex3f(maxX, maxY, maxZ);
+	glVertex3f(minX, maxY, maxZ);
+	glEnd();
+	//Top face
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(minX, maxY, maxZ);
+	glVertex3f(maxX, maxY, maxZ);
+	glVertex3f(maxX, maxY, minZ);
+	glVertex3f(minX, maxY, minZ);
+	glEnd();
+	//Bottom face
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(minX, minY, maxZ);
+	glVertex3f(maxX, minY, maxZ);
+	glVertex3f(maxX, minY, minZ);
+	glVertex3f(minX, minY, minZ);
+	glEnd();
+	//Left face
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(minX, minY, minZ);
+	glVertex3f(minX, minY, maxZ);
+	glVertex3f(minX, maxY, maxZ);
+	glVertex3f(minX, maxY, minZ);
+	glEnd();
+	//Right face
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(maxX, minY, minZ);
+	glVertex3f(maxX, minY, maxZ);
+	glVertex3f(maxX, maxY, maxZ);
+	glVertex3f(maxX, maxY, minZ);
+	glEnd();
 	glPopMatrix();
 }
