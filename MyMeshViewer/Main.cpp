@@ -143,7 +143,7 @@ void renderScene()
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0, 0.0, 0.0, 1.0);	//Black background
+	glClearColor(0.8f, 0.8f, 0.8f, 1.0);	//Light grey background
 
 	//Swap the buffers
 	glutSwapBuffers();
