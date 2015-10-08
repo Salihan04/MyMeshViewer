@@ -76,6 +76,8 @@ float calcFaceArea(Normal* n);
 Normal* vertexNormal(Vertex* v);
 void initPerVertexNormals();
 void clearData();
+void drawGround();
+void drawAxes();
 
 int main(int argc, char **argv)
 {
@@ -133,8 +135,6 @@ int main(int argc, char **argv)
 
 	glutMainLoop();
 
-	system("pause");
-
 	return 0;
 }
 
@@ -144,6 +144,10 @@ void renderScene()
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0);	//Light grey background
+
+	glLoadIdentity();
+	drawGround();
+	drawAxes();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -570,4 +574,81 @@ void clearData()
 	HE_verts.clear();
 	HE_faces.clear();
 	HE_edges.clear();
+}
+
+//Function to draw grid lines on the ground which is the xy plane
+void drawGround()
+{
+	//Set color of lines to black
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+
+	glPushMatrix();
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+
+	glBegin(GL_LINES);
+	for (int x = -10; x < 11; x++)
+	{
+		glVertex2i(x, -10);
+		glVertex2i(x, 10);
+	}
+	for (int y = -10; y < 11; y++)
+	{
+		glVertex2i(-10, y);
+		glVertex2i(10, y);
+	}
+	glEnd();
+
+	glPopMatrix();
+}
+
+//Function to draw x,y,z axes
+void drawAxes()
+{
+	GLUquadric* quad;
+	quad = gluNewQuadric();
+
+	//Drawing y-axis which is made up of a cylinder and a cone
+	//Need to rotate along x-axis since gluCylinder & glutSolidCone draws along z-axis
+	glPushMatrix();
+	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0.0f, 0.4f, 0.0f);
+	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	glutSolidCone(0.3, 0.1, 32, 32);
+	glPopMatrix();
+
+	//Drawing x-axis which is made up of a cylinder and a cone
+	//Need to rotate along y-axis since gluCylinder & glutSolidCone draws along z-axis
+	glPushMatrix();
+	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0.4f, 0.0f, 0.0f);
+	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+	glutSolidCone(0.3, 0.1, 32, 32);
+	glPopMatrix();
+
+	//Drawing z-axis which is made up of a cylinder and a cone
+	glPushMatrix();
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0.0f, 0.0f, 0.4f);
+	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+	glutSolidCone(0.3, 0.1, 32, 32);
+	glPopMatrix();
 }
