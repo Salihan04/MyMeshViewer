@@ -82,6 +82,7 @@ void drawGround();
 void drawAxes();
 void findBoundingVolDimensions();
 void drawBoundingVol();
+void drawModelPoints();
 
 int main(int argc, char **argv)
 {
@@ -156,7 +157,7 @@ void renderScene()
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -171,12 +172,14 @@ void renderScene()
 	glLoadIdentity();
 	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
+	//Adjust starting orientation of scene
 	glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
 	glRotatef(270.0f, 0.0f, 0.0f, 1.0f);
 
 	drawGround();
-	drawAxes();
+	//drawAxes();
 	drawBoundingVol();
+	drawModelPoints();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -615,16 +618,16 @@ void drawGround()
 //	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 
 	glBegin(GL_LINES);
-	for (int x = -10; x < 11; x++)
-	{
-		glVertex2i(x, -10);
-		glVertex2i(x, 10);
-	}
-	for (int y = -10; y < 11; y++)
-	{
-		glVertex2i(-10, y);
-		glVertex2i(10, y);
-	}
+		for (int x = -10; x < 11; x++)
+		{
+			glVertex2i(x, -10);
+			glVertex2i(x, 10);
+		}
+		for (int y = -10; y < 11; y++)
+		{
+			glVertex2i(-10, y);
+			glVertex2i(10, y);
+		}
 	glEnd();
 
 //	glPopMatrix();
@@ -639,46 +642,46 @@ void drawAxes()
 	//Drawing y-axis which is made up of a cylinder and a cone
 	//Need to rotate along x-axis since gluCylinder & glutSolidCone draws along z-axis
 	glPushMatrix();
-	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
-	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
-	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
+		glRotatef(270.0, 1.0f, 0.0f, 0.0f);
+		glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.0f, 1.0f, 0.0f);
-	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
-	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
-	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	glutSolidCone(0.3, 0.1, 32, 32);
+		glTranslatef(0.0f, 1.0f, 0.0f);
+		glRotatef(270.0, 1.0f, 0.0f, 0.0f);
+		glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		glutSolidCone(0.3, 0.1, 32, 32);
 	glPopMatrix();
 
 	//Drawing x-axis which is made up of a cylinder and a cone
 	//Need to rotate along y-axis since gluCylinder & glutSolidCone draws along z-axis
 	glPushMatrix();
-	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
-	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
-	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-	gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
+		glRotatef(90.0, 0.0f, 1.0f, 0.0f);
+		glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
+		glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(1.0f, 0.0f, 0.0f);
-	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
-	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
-	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-	glutSolidCone(0.3, 0.1, 32, 32);
+		glTranslatef(1.0f, 0.0f, 0.0f);
+		glRotatef(90.0, 0.0f, 1.0f, 0.0f);
+		glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
+		glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		glutSolidCone(0.3, 0.1, 32, 32);
 	glPopMatrix();
 
 	//Drawing z-axis which is made up of a cylinder and a cone
 	glPushMatrix();
-	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
-	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-	gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
+		glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
+		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+		gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, 1.0f);
-	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
-	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-	glutSolidCone(0.3, 0.1, 32, 32);
+		glTranslatef(0.0f, 0.0f, 1.0f);
+		glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
+		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+		glutSolidCone(0.3, 0.1, 32, 32);
 	glPopMatrix();
 }
 
@@ -715,50 +718,67 @@ void findBoundingVolDimensions()
 void drawBoundingVol()
 {
 	glPushMatrix();
-	glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
-//	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
-	glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
-	//Back face
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(minX, minY, minZ);
-	glVertex3f(maxX, minY, minZ);
-	glVertex3f(maxX, maxY, minZ);
-	glVertex3f(minX, maxY, minZ);
-	glEnd();
-	//Front face
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(minX, minY, maxZ);
-	glVertex3f(maxX, minY, maxZ);
-	glVertex3f(maxX, maxY, maxZ);
-	glVertex3f(minX, maxY, maxZ);
-	glEnd();
-	//Top face
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(minX, maxY, maxZ);
-	glVertex3f(maxX, maxY, maxZ);
-	glVertex3f(maxX, maxY, minZ);
-	glVertex3f(minX, maxY, minZ);
-	glEnd();
-	//Bottom face
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(minX, minY, maxZ);
-	glVertex3f(maxX, minY, maxZ);
-	glVertex3f(maxX, minY, minZ);
-	glVertex3f(minX, minY, minZ);
-	glEnd();
-	//Left face
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(minX, minY, minZ);
-	glVertex3f(minX, minY, maxZ);
-	glVertex3f(minX, maxY, maxZ);
-	glVertex3f(minX, maxY, minZ);
-	glEnd();
-	//Right face
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(maxX, minY, minZ);
-	glVertex3f(maxX, minY, maxZ);
-	glVertex3f(maxX, maxY, maxZ);
-	glVertex3f(maxX, maxY, minZ);
-	glEnd();
+		glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+//		glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+		glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+		//Back face
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(minX, minY, minZ);
+			glVertex3f(maxX, minY, minZ);
+			glVertex3f(maxX, maxY, minZ);
+			glVertex3f(minX, maxY, minZ);
+		glEnd();
+		//Front face
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(minX, minY, maxZ);
+			glVertex3f(maxX, minY, maxZ);
+			glVertex3f(maxX, maxY, maxZ);
+			glVertex3f(minX, maxY, maxZ);
+		glEnd();
+		//Top face
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(minX, maxY, maxZ);
+			glVertex3f(maxX, maxY, maxZ);
+			glVertex3f(maxX, maxY, minZ);
+			glVertex3f(minX, maxY, minZ);
+		glEnd();
+		//Bottom face
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(minX, minY, maxZ);
+			glVertex3f(maxX, minY, maxZ);
+			glVertex3f(maxX, minY, minZ);
+			glVertex3f(minX, minY, minZ);
+		glEnd();
+		//Left face
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(minX, minY, minZ);
+			glVertex3f(minX, minY, maxZ);
+			glVertex3f(minX, maxY, maxZ);
+			glVertex3f(minX, maxY, minZ);
+		glEnd();
+		//Right face
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(maxX, minY, minZ);
+			glVertex3f(maxX, minY, maxZ);
+			glVertex3f(maxX, maxY, maxZ);
+			glVertex3f(maxX, maxY, minZ);
+		glEnd();
 	glPopMatrix();
+}
+
+//Function to draw model as points
+void drawModelPoints()
+{
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		Vertex* v = vertices.at(i);
+
+		glPushMatrix();
+		glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+			glBegin(GL_POINTS);
+				glVertex3f(v->x, v->y, v->z);
+			glEnd();
+		glPopMatrix();
+	}
 }
