@@ -85,6 +85,7 @@ void drawBoundingVol();
 void drawModelPoints();
 void drawModelWireframe();
 void drawModelFlat();
+void drawModelSmooth();
 
 int main(int argc, char **argv)
 {
@@ -183,7 +184,8 @@ void renderScene()
 	drawBoundingVol();
 	//drawModelPoints();
 	//drawModelWireframe();
-	drawModelFlat();
+	//drawModelFlat();
+	drawModelSmooth();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -827,6 +829,33 @@ void drawModelFlat()
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
 			glEnd();
+		glPopMatrix();
+	}
+}
+
+//Function to draw model with smooth shading
+void drawModelSmooth()
+{
+	//Use flat shading mode
+	glShadeModel(GL_SMOOTH);
+
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		Vertex* v1 = f->v1;
+		Vertex* v2 = f->v2;
+		Vertex* v3 = f->v3;
+		Normal* n1 = perVertexNormals.at(v1->index - 1);
+		Normal* n2 = perVertexNormals.at(v2->index - 1);
+		Normal* n3 = perVertexNormals.at(v3->index - 1);
+
+		glPushMatrix();
+		glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+		glBegin(GL_TRIANGLES);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+		glEnd();
 		glPopMatrix();
 	}
 }
