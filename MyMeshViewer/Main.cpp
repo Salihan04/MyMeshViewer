@@ -155,14 +155,25 @@ void renderScene()
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
 
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0);	//Light grey background
 
+	//Setup the perspective projection
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	gluPerspective(60.0, 1.0, 0.1, 100.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+	glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
+	glRotatef(270.0f, 0.0f, 0.0f, 1.0f);
+
 	drawGround();
 	drawAxes();
 	drawBoundingVol();
@@ -600,8 +611,8 @@ void drawGround()
 	//Set color of lines to black
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
-	glPushMatrix();
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+//	glPushMatrix();
+//	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 
 	glBegin(GL_LINES);
 	for (int x = -10; x < 11; x++)
@@ -616,7 +627,7 @@ void drawGround()
 	}
 	glEnd();
 
-	glPopMatrix();
+//	glPopMatrix();
 }
 
 //Function to draw x,y,z axes
@@ -629,14 +640,14 @@ void drawAxes()
 	//Need to rotate along x-axis since gluCylinder & glutSolidCone draws along z-axis
 	glPushMatrix();
 	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
+	gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.0f, 0.5f, 0.0f);
+	glTranslatef(0.0f, 1.0f, 0.0f);
 	glRotatef(270.0, 1.0f, 0.0f, 0.0f);
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 	glutSolidCone(0.3, 0.1, 32, 32);
 	glPopMatrix();
@@ -645,27 +656,27 @@ void drawAxes()
 	//Need to rotate along y-axis since gluCylinder & glutSolidCone draws along z-axis
 	glPushMatrix();
 	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
 	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
+	gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.5f, 0.0f, 0.0f);
+	glTranslatef(1.0f, 0.0f, 0.0f);
 	glRotatef(90.0, 0.0f, 1.0f, 0.0f);
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
 	glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 	glutSolidCone(0.3, 0.1, 32, 32);
 	glPopMatrix();
 
 	//Drawing z-axis which is made up of a cylinder and a cone
 	glPushMatrix();
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
 	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-	gluCylinder(quad, 0.1f, 0.1f, 0.5f, 32, 32);
+	gluCylinder(quad, 0.1f, 0.1f, 1.0f, 32, 32);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, 0.5f);
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glTranslatef(0.0f, 0.0f, 1.0f);
+	glScalef(1 / 10.0f, 1 / 10.0f, 1.0f);
 	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
 	glutSolidCone(0.3, 0.1, 32, 32);
 	glPopMatrix();
@@ -704,8 +715,8 @@ void findBoundingVolDimensions()
 void drawBoundingVol()
 {
 	glPushMatrix();
-//	glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
-	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+	glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+//	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 	glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 	//Back face
 	glBegin(GL_LINE_LOOP);
