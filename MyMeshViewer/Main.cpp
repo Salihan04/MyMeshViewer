@@ -84,6 +84,7 @@ void findBoundingVolDimensions();
 void drawBoundingVol();
 void drawModelPoints();
 void drawModelWireframe();
+void drawModelFlat();
 
 int main(int argc, char **argv)
 {
@@ -150,15 +151,15 @@ int main(int argc, char **argv)
 void renderScene()
 {
 	//Setup OpenGL lighting
-	GLfloat light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };		//light position
-	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
+	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
+	GLfloat white_light[] = { 1.0f, 0.0f, 1.0f, 1.0f };			//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 	glEnable(GL_LIGHT0);
-	//glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
 
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -175,13 +176,14 @@ void renderScene()
 
 	//Adjust starting orientation of scene
 	glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
-	glRotatef(350.0f, 1.0f, 0.0f, 1.0f);
+	glRotatef(350.0f, 0.0f, 0.0f, 1.0f);
 
 	drawGround();
 	drawAxes();
 	drawBoundingVol();
 	//drawModelPoints();
-	drawModelWireframe();
+	//drawModelWireframe();
+	drawModelFlat();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -797,6 +799,33 @@ void drawModelWireframe()
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v2->x, v2->y, v2->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v3->x, v3->y, v3->z);
+			glEnd();
+		glPopMatrix();
+	}
+}
+
+//Function to draw model with flat shading
+void drawModelFlat()
+{
+	//Use flat shading mode
+	glShadeModel(GL_FLAT);
+
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		Vertex* v1 = f->v1;
+		Vertex* v2 = f->v2;
+		Vertex* v3 = f->v3;
+		Normal* n1 = perVertexNormals.at(v1->index - 1);
+		Normal* n2 = perVertexNormals.at(v2->index - 1);
+		Normal* n3 = perVertexNormals.at(v3->index - 1);
+
+		glPushMatrix();
+			glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glBegin(GL_TRIANGLES);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
 			glEnd();
 		glPopMatrix();
 	}
