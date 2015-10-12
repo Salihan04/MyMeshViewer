@@ -147,6 +147,17 @@ int main(int argc, char **argv)
 //Function to draw items in scene
 void renderScene()
 {
+	//Setup OpenGL lighting
+	GLfloat light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };		//light position
+	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
+	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0);	//Light grey background
