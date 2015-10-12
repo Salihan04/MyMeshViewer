@@ -83,6 +83,7 @@ void drawAxes();
 void findBoundingVolDimensions();
 void drawBoundingVol();
 void drawModelPoints();
+void drawModelWireframe();
 
 int main(int argc, char **argv)
 {
@@ -174,12 +175,13 @@ void renderScene()
 
 	//Adjust starting orientation of scene
 	glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
-	glRotatef(270.0f, 0.0f, 0.0f, 1.0f);
+	glRotatef(350.0f, 1.0f, 0.0f, 1.0f);
 
 	drawGround();
-	//drawAxes();
+	drawAxes();
 	drawBoundingVol();
-	drawModelPoints();
+	//drawModelPoints();
+	drawModelWireframe();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -708,10 +710,6 @@ void findBoundingVolDimensions()
 		if (v->z > maxZ)
 			maxZ = v->z;
 	}
-
-	cout << "MinX: " << minX << ", MaxX: " << maxX << endl;
-	cout << "MinY: " << minY << ", MaxY: " << maxY << endl;
-	cout << "MinZ: " << minZ << ", MaxZ: " << maxZ << endl;
 }
 
 //Function to draw the bounding volume to enclose the model renderred
@@ -774,10 +772,31 @@ void drawModelPoints()
 		Vertex* v = vertices.at(i);
 
 		glPushMatrix();
-		glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
 			glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 			glBegin(GL_POINTS);
 				glVertex3f(v->x, v->y, v->z);
+			glEnd();
+		glPopMatrix();
+	}
+}
+
+//Function to draw model as wireframe
+void drawModelWireframe()
+{
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		Vertex* v1 = f->v1;
+		Vertex* v2 = f->v2;
+		Vertex* v3 = f->v3;
+
+		glPushMatrix();
+			glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glBegin(GL_LINE_LOOP);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v1->x, v1->y, v1->z);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v2->x, v2->y, v2->z);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v3->x, v3->y, v3->z);
 			glEnd();
 		glPopMatrix();
 	}
