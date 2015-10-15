@@ -176,8 +176,8 @@ void renderScene()
 	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
 	//Adjust starting orientation of scene
-	glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
-	glRotatef(350.0f, 0.0f, 0.0f, 1.0f);
+	//glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
+	//glRotatef(350.0f, 0.0f, 0.0f, 1.0f);
 
 	drawGround();
 	drawAxes();
@@ -231,33 +231,48 @@ void initVertices()
 	for (size_t n = 0; n < vertices_string.size(); n++)
 	{
 		int j = 0;
+		int count = 0;
 		float coords[3];
 		string temp = "";
 		Vertex* v = new Vertex();
 
-		//The coordinates typically start at string index 10 till end of string
-		for (size_t i = 10; i < vertices_string.at(n).length(); i++)
+		for (size_t i = 0; i < vertices_string.at(n).length(); i++)
 		{
-			//Need to take into account of space characters between x, y, and z coordinate
-			//For some vertex, coordinates start at a later string index depending on vertex index
 			if (vertices_string.at(n)[i] == ' ')
 			{
-				//When a space character is encountered, check if temp is empty string
-				//If temp is not empty, add to array of cordinates and then reset temp
-				if (temp != "")
-				{
-					coords[j] = atof(temp.c_str());
-					j++;
-					temp = "";
-				}
-				//If temp is empty, it means no coordinate has been encountered yet
-				//Continue traversing
-				else
+				count++;
+
+				if (count < 3)
 					continue;
 			}
-			//Build up temp which will then be converted to float value of coordinate
-			else
-				temp += vertices_string.at(n)[i];
+
+			//The coordinate data only starts after 3 spaces are found in the string
+			if (count >= 3)
+			{
+				//Need to take into account of space characters between x, y, and z coordinate
+				//For some vertex, coordinates start at a later string index depending on vertex index
+				if (vertices_string.at(n)[i] == ' ')
+				{
+					//When a space character is encountered, check if temp is empty string
+					//If temp is not empty, add to array of cordinates and then reset temp
+					if (temp != "")
+					{
+						stringstream strs;
+						strs << temp;
+						strs >> coords[j];
+						//coords[j] = stof(temp);
+						j++;
+						temp = "";
+					}
+					//If temp is empty, it means no coordinate has been encountered yet
+					//Continue traversing
+					else
+						continue;
+				}
+				//Build up temp which will then be converted to float value of coordinate
+				else
+					temp += vertices_string.at(n)[i];
+			}
 		}
 		//When end of string is reached, check if temp is non-empty string
 		//If non-empty, add to array of coordinates and then reset temp
@@ -283,33 +298,45 @@ void initFaces()
 	for (size_t n = 0; n < faces_string.size(); n++)
 	{
 		int j = 0;
+		int count = 0;
 		int vertexIndex[3];
 		string temp = "";
 		Face* f = new Face();
 
-		//The vertex indices typically start at string index 8 till end of string
-		for (size_t i = 8; i < faces_string.at(n).length(); i++)
+		for (size_t i = 0; i < faces_string.at(n).length(); i++)
 		{
-			//Need to take into account of space characters between vertex indices
-			//For some face, vertex indices start at a later string index depending on face index
 			if (faces_string.at(n)[i] == ' ')
 			{
-				//When a space character is encountered, check if temp is empty string
-				//If temp is not empty, add to array of vertex indices and then reset temp
-				if (temp != "")
-				{
-					vertexIndex[j] = atoi(temp.c_str());
-					j++;
-					temp = "";
-				}
-				//If temp is empty, it means no vertex index has been encountered yet
-				//Continue traversing
-				else
+				count++;
+
+				if(count < 3)
 					continue;
 			}
-			//Build up temp which will then be converted to int value of vertex index
-			else
-				temp += faces_string.at(n)[i];
+
+			//The vertex indices data only starts after 3 spaces are found in the string
+			if (count >= 3)
+			{
+				//Need to take into account of space characters between vertex indices
+				//For some face, vertex indices start at a later string index depending on face index
+				if (faces_string.at(n)[i] == ' ')
+				{
+					//When a space character is encountered, check if temp is empty string
+					//If temp is not empty, add to array of vertex indices and then reset temp
+					if (temp != "")
+					{
+						vertexIndex[j] = atoi(temp.c_str());
+						j++;
+						temp = "";
+					}
+					//If temp is empty, it means no vertex index has been encountered yet
+					//Continue traversing
+					else
+						continue;
+				}
+				//Build up temp which will then be converted to int value of vertex index
+				else
+					temp += faces_string.at(n)[i];
+			}
 		}
 		//When end of string is reached, check if temp is non-empty string
 		//If non-empty, add to array of vertex indices and then reset temp
@@ -720,7 +747,7 @@ void findBoundingVolDimensions()
 void drawBoundingVol()
 {
 	glPushMatrix();
-		glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+		glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
 //		glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
 		glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 		//Back face
@@ -776,7 +803,7 @@ void drawModelPoints()
 		Vertex* v = vertices.at(i);
 
 		glPushMatrix();
-			glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
 			glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 			glBegin(GL_POINTS);
 				glVertex3f(v->x, v->y, v->z);
@@ -796,7 +823,7 @@ void drawModelWireframe()
 		Vertex* v3 = f->v3;
 
 		glPushMatrix();
-			glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
 			glBegin(GL_LINE_LOOP);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v2->x, v2->y, v2->z);
@@ -823,7 +850,7 @@ void drawModelFlat()
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
 		glPushMatrix();
-			glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
+			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
 			glBegin(GL_TRIANGLES);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
@@ -850,12 +877,12 @@ void drawModelSmooth()
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
 		glPushMatrix();
-		glScalef(1 / maxX, 1 / maxY, 1 / maxZ);
-		glBegin(GL_TRIANGLES);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-		glEnd();
+			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
+			glBegin(GL_TRIANGLES);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+			glEnd();
 		glPopMatrix();
 	}
 }
