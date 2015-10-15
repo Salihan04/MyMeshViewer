@@ -8,8 +8,19 @@
 
 using namespace std;
 
+#define TRANSFORM_NONE		0
+#define TRANSFORM_ROTATE	1
+#define TRANSFORM_SCALE		2
+#define TRANSFORM_TRANSLATE	3
+
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
+
+static int press_x, press_y;
+static float x_angle = 0.0;
+static float y_angle = 0.0;
+static float scale_size = 1;
+static int xform_mode = 0;
 
 float minX, minY, minZ, maxX, maxY, maxZ;
 
