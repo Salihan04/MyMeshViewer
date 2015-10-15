@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	clearData();
 
 	//Initialise data needed for rendering
-	parseFile("TestModels/cap.m");
+	parseFile("TestModels/statute.m");
 	initVertices();
 	initFaces();
 	
@@ -204,7 +204,7 @@ void parseFile(string fileName)
 
 	//Check if file has been opened
 	if (!infile.is_open())
-		cout << "Cannot open dummy.txt" << endl;
+		cout << "Cannot open " << fileName << endl;
 
 	while (infile)
 	{
@@ -257,10 +257,7 @@ void initVertices()
 					//If temp is not empty, add to array of cordinates and then reset temp
 					if (temp != "")
 					{
-						stringstream strs;
-						strs << temp;
-						strs >> coords[j];
-						//coords[j] = stof(temp);
+						coords[j] = stof(temp);
 						j++;
 						temp = "";
 					}
