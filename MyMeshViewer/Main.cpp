@@ -17,12 +17,16 @@ static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
 
 static int press_x, press_y;
-static float x_angle = 0.0;
-static float y_angle = 0.0;
-static float scale_size = 1;
+static float x_angle = 0.0f;
+static float y_angle = 0.0f;
+static float z_angle = 0.0f;
+static float scale_size = 1.0f;
+static float tx = 0.0f;
+static float ty = 0.0f;
+static float tz = 0.0f;
 static int xform_mode = 0;
 
-float minX, minY, minZ, maxX, maxY, maxZ;
+float minX, minY, minZ, maxX, maxY, maxZ, max;
 
 //Data structures for vertex, face, vector and normal
 typedef struct
@@ -97,6 +101,7 @@ void drawModelPoints();
 void drawModelWireframe();
 void drawModelFlat();
 void drawModelSmooth();
+void myMouse(int button, int state, int x, int y);
 
 int main(int argc, char **argv)
 {
@@ -124,7 +129,7 @@ int main(int argc, char **argv)
 	clearData();
 
 	//Initialise data needed for rendering
-	parseFile("TestModels/statute.m");
+	parseFile("TestModels/eight.m");
 	initVertices();
 	initFaces();
 	
@@ -189,6 +194,9 @@ void renderScene()
 	//Adjust starting orientation of scene
 	//glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
 	//glRotatef(350.0f, 0.0f, 0.0f, 1.0f);
+
+	//Handle the translation
+	glTranslatef(tx, ty, tz);
 
 	drawGround();
 	drawAxes();
@@ -749,14 +757,19 @@ void findBoundingVolDimensions()
 		if (v->z > maxZ)
 			maxZ = v->z;
 	}
+
+	max = maxX;
+	if (maxY > max)
+		max = maxY;
+	if (maxZ > max)
+		max = maxZ;
 }
 
 //Function to draw the bounding volume to enclose the model renderred
 void drawBoundingVol()
 {
 	glPushMatrix();
-		glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
-//		glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
+		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 		glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 		//Back face
 		glBegin(GL_LINE_LOOP);
@@ -811,7 +824,7 @@ void drawModelPoints()
 		Vertex* v = vertices.at(i);
 
 		glPushMatrix();
-			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
+			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 			glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 			glBegin(GL_POINTS);
 				glVertex3f(v->x, v->y, v->z);
@@ -831,7 +844,7 @@ void drawModelWireframe()
 		Vertex* v3 = f->v3;
 
 		glPushMatrix();
-			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
+			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 			glBegin(GL_LINE_LOOP);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v2->x, v2->y, v2->z);
@@ -858,7 +871,7 @@ void drawModelFlat()
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
 		glPushMatrix();
-			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
+			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 			glBegin(GL_TRIANGLES);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
@@ -885,7 +898,8 @@ void drawModelSmooth()
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
 		glPushMatrix();
-			glScalef(1 / (maxX - minX), 1 / (maxY - minY), 1 / (maxZ - minZ));
+			//glScalef(1 / max, 1 / max, 1 / max);
+			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 			glBegin(GL_TRIANGLES);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
@@ -893,4 +907,18 @@ void drawModelSmooth()
 			glEnd();
 		glPopMatrix();
 	}
+}
+
+void myMouse(int button, int state, int x, int y)
+{
+	if (state == GLUT_DOWN)
+	{
+		press_x = x;
+		press_y = y;
+
+		if (button == GLUT_MIDDLE_BUTTON)
+			xform_mode = TRANSFORM_TRANSLATE;
+	}
+	else if (state == GLUT_UP)
+		xform_mode = TRANSFORM_NONE;
 }
