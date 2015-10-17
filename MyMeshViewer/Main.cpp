@@ -180,6 +180,8 @@ void renderScene()
 
 	//Handle the translation
 	glTranslatef(tx, ty, 0.0f);
+	//Handle the scaling
+	glScalef(scale_size, scale_size, scale_size);
 
 	drawGround();
 	drawAxes();
@@ -908,21 +910,32 @@ void myMotion(int x, int y)
 {
 	if (xform_mode == TRANSFORM_TRANSLATE)
 	{
-		//Update the translation factor based on the 
-		//difference of current mouse position and previous mouse position
+		//Update the translation factor based on the difference of current mouse position and previous mouse position
 		//Need to divide by 100.0f or else translation will be too wild
 //		if (y == press_y && x != press_x)
 //		{
 			tx += (x - press_x) / 100.0f;
 //			ty = 0.0f;
 //		}
-		//For the y translation factor, we do a subtraction because in window coordinate system, 
-		//y value increases as you go down
+		//For the y translation factor, we do a subtraction of y from press_y 
+		//because in window coordinate system, y value increases as you go down
 //		if (x == press_x && y != press_y)
 //		{
 //			tx = 0.0f;
-			ty -= (y - press_y) / 100.0f;
+			ty += (press_y - y) / 100.0f;
 //		}
+	}
+	else if (xform_mode == TRANSFORM_SCALE)
+	{
+		float old_size = scale_size;
+
+		//We do a subtraction of y from press_y because in window coordinate system, y value increases as you go down
+		//If we don't do the above, the camera will move further from object as we move the mouse upward
+		//We want the camera to move closer to the object as we move the mouse upward instead
+		scale_size *= (1 + (press_y - y) / 100.0f);
+
+		if (scale_size < 0.0f)
+			scale_size = old_size;
 	}
 
 	press_x = x;
