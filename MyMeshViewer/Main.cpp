@@ -23,7 +23,6 @@ static float z_angle = 0.0f;
 static float scale_size = 1.0f;
 static float tx = 0.0f;
 static float ty = 0.0f;
-static float tz = 0.0f;
 static int xform_mode = 0;
 
 float minX, minY, minZ, maxX, maxY, maxZ, max;
@@ -110,7 +109,7 @@ int main(int argc, char **argv)
 	clearData();
 
 	//Initialise data needed for rendering
-	parseFile("TestModels/cap.m");
+	parseFile("TestModels/bottle.m");
 	initVertices();
 	initFaces();
 	
@@ -180,7 +179,7 @@ void renderScene()
 	//glRotatef(350.0f, 0.0f, 0.0f, 1.0f);
 
 	//Handle the translation
-	glTranslatef(tx, ty, tz);
+	glTranslatef(tx, ty, 0.0f);
 
 	drawGround();
 	drawAxes();
@@ -896,6 +895,8 @@ void myMouse(int button, int state, int x, int y)
 		//When the middle button is held down, do translation
 		if (button == GLUT_MIDDLE_BUTTON)
 			xform_mode = TRANSFORM_TRANSLATE;
+		else if (button == GLUT_RIGHT_BUTTON)
+			xform_mode = TRANSFORM_SCALE;
 	}
 	//If no button is held down, do not do any transformation
 	else if (state == GLUT_UP)
@@ -909,11 +910,19 @@ void myMotion(int x, int y)
 	{
 		//Update the translation factor based on the 
 		//difference of current mouse position and previous mouse position
-		//Need to divide by max or else translation will be too wild
-		tx += (x - press_x)/max;
+		//Need to divide by 100.0f or else translation will be too wild
+//		if (y == press_y && x != press_x)
+//		{
+			tx += (x - press_x) / 100.0f;
+//			ty = 0.0f;
+//		}
 		//For the y translation factor, we do a subtraction because in window coordinate system, 
 		//y value increases as you go down
-		ty -= (y - press_y)/max;
+//		if (x == press_x && y != press_y)
+//		{
+//			tx = 0.0f;
+			ty -= (y - press_y) / 100.0f;
+//		}
 	}
 
 	press_x = x;
