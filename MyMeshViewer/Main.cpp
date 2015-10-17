@@ -102,34 +102,15 @@ void drawModelWireframe();
 void drawModelFlat();
 void drawModelSmooth();
 void myMouse(int button, int state, int x, int y);
+void myMotion(int x, int y);
 
 int main(int argc, char **argv)
 {
-	/*
-	for (int i = 0; i < sizeof(testModels) / sizeof(testModels[0]); i++)
-	{
-		string filename = "TestModels/" + testModels[i];
-
-		//Parse M file
-		parseFile(filename);
-
-		//Print info of file
-		cout << "Model: " << testModels[i] << endl;
-		cout << "No. of vertices: " << vertices.size() << endl;
-		cout << "No. of faces: " << faces.size() << endl;
-		cout << endl;
-
-		//Clear vectors
-		vertices.clear();
-		faces.clear();
-	}
-	*/
-
 	//Reset data
 	clearData();
 
 	//Initialise data needed for rendering
-	parseFile("TestModels/eight.m");
+	parseFile("TestModels/cap.m");
 	initVertices();
 	initFaces();
 	
@@ -156,8 +137,12 @@ int main(int argc, char **argv)
 	//Create window with OpenGL
 	window = glutCreateWindow("CZ4004 MeshViewer (Muhammad Salihan Bin Zaol-kefli)");
 
+	glClearColor(0.8f, 0.8f, 0.8f, 1.0);	//Light grey background
+
 	//Register callbacks
 	glutDisplayFunc(renderScene);
+	glutMouseFunc(myMouse);
+	glutMotionFunc(myMotion);
 
 	glutMainLoop();
 
@@ -180,7 +165,6 @@ void renderScene()
 
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.8f, 0.8f, 0.8f, 1.0);	//Light grey background
 
 	//Setup the perspective projection
 	glMatrixMode(GL_PROJECTION);
@@ -208,8 +192,6 @@ void renderScene()
 
 	//Swap the buffers
 	glutSwapBuffers();
-	//Force the redraw function
-	glutPostRedisplay();
 }
 
 //Function to read from model file and separate the strings for Vertex and Face
@@ -663,9 +645,6 @@ void drawGround()
 	//Set color of lines to black
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
-//	glPushMatrix();
-//	glScalef(1 / 20.0f, 1 / 20.0f, 1.0f);
-
 	glBegin(GL_LINES);
 		for (int x = -10; x < 11; x++)
 		{
@@ -678,8 +657,6 @@ void drawGround()
 			glVertex2i(10, y);
 		}
 	glEnd();
-
-//	glPopMatrix();
 }
 
 //Function to draw x,y,z axes
@@ -898,7 +875,6 @@ void drawModelSmooth()
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
 		glPushMatrix();
-			//glScalef(1 / max, 1 / max, 1 / max);
 			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 			glBegin(GL_TRIANGLES);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
@@ -909,6 +885,7 @@ void drawModelSmooth()
 	}
 }
 
+//Function to capture mouse information such as button clicked and position in window
 void myMouse(int button, int state, int x, int y)
 {
 	if (state == GLUT_DOWN)
@@ -916,9 +893,32 @@ void myMouse(int button, int state, int x, int y)
 		press_x = x;
 		press_y = y;
 
+		//When the middle button is held down, do translation
 		if (button == GLUT_MIDDLE_BUTTON)
 			xform_mode = TRANSFORM_TRANSLATE;
 	}
+	//If no button is held down, do not do any transformation
 	else if (state == GLUT_UP)
 		xform_mode = TRANSFORM_NONE;
+}
+
+//Function to capture mouse motion
+void myMotion(int x, int y)
+{
+	if (xform_mode == TRANSFORM_TRANSLATE)
+	{
+		//Update the translation factor based on the 
+		//difference of current mouse position and previous mouse position
+		//Need to divide by max or else translation will be too wild
+		tx += (x - press_x)/max;
+		//For the y translation factor, we do a subtraction because in window coordinate system, 
+		//y value increases as you go down
+		ty -= (y - press_y)/max;
+	}
+
+	press_x = x;
+	press_y = y;
+
+	//Force the redraw function
+	glutPostRedisplay();
 }
