@@ -26,6 +26,7 @@ static float ty = 0.0f;
 static int xform_mode = 0;
 
 float minX, minY, minZ, maxX, maxY, maxZ, max;
+bool isLightEnabled = false;
 
 //Data structures for vertex, face, vector and normal
 typedef struct
@@ -110,6 +111,8 @@ int main(int argc, char **argv)
 
 	//Initialise data needed for rendering
 	parseFile("TestModels/cap.m");
+	cout << "Model loaded" << endl;
+	cout << "Rendering..." << endl;
 	initVertices();
 	initFaces();
 	
@@ -131,7 +134,7 @@ int main(int argc, char **argv)
 
 	//Initialise window size and position
 	glutInitWindowSize(600, 600);
-	glutInitWindowPosition(100, 100);
+	glutInitWindowPosition(300, 100);
 
 	//Create window with OpenGL
 	window = glutCreateWindow("CZ4004 MeshViewer (Muhammad Salihan Bin Zaol-kefli)");
@@ -142,6 +145,8 @@ int main(int argc, char **argv)
 	glutDisplayFunc(renderScene);
 	glutMouseFunc(myMouse);
 	glutMotionFunc(myMotion);
+
+	cout << "Rendering complete" << endl;
 
 	glutMainLoop();
 
@@ -186,6 +191,7 @@ void renderScene()
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
+	isLightEnabled = true;
 
 	//drawModelPoints();
 	//drawModelWireframe();
@@ -798,6 +804,15 @@ void drawBoundingVol()
 //Function to draw model as points
 void drawModelPoints()
 {
+	//For pint rendering, disabling the lighting would allow us to see the color better
+	if (isLightEnabled)
+	{
+		glDisable(GL_LIGHTING);
+		isLightEnabled = false;
+	}
+
+	glPointSize(2.0f);
+
 	for (size_t i = 0; i < vertices.size(); i++)
 	{
 		Vertex* v = vertices.at(i);
@@ -815,6 +830,13 @@ void drawModelPoints()
 //Function to draw model as wireframe
 void drawModelWireframe()
 {
+	//For wireframe rendering, disabling the lighting would allow us to see the color better
+	if (isLightEnabled)
+	{
+		glDisable(GL_LIGHTING);
+		isLightEnabled = false;
+	}
+
 	for (size_t i = 0; i < faces.size(); i++)
 	{
 		Face* f = faces.at(i);
@@ -836,6 +858,13 @@ void drawModelWireframe()
 //Function to draw model with flat shading
 void drawModelFlat()
 {
+	//For flat shading, need to turn on light for better effect
+	if (!isLightEnabled)
+	{
+		glEnable(GL_LIGHTING);
+		isLightEnabled = true;
+	}
+
 	//Use flat shading mode
 	glShadeModel(GL_FLAT);
 
@@ -863,6 +892,13 @@ void drawModelFlat()
 //Function to draw model with smooth shading
 void drawModelSmooth()
 {
+	//For smooth shading, need to turn on light for better effect
+	if (!isLightEnabled)
+	{
+		glEnable(GL_LIGHTING);
+		isLightEnabled = true;
+	}
+
 	//Use flat shading mode
 	glShadeModel(GL_SMOOTH);
 
