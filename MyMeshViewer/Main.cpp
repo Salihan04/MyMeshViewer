@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 	clearData();
 
 	//Initialise data needed for rendering
-	parseFile("TestModels/bottle.m");
+	parseFile("TestModels/cap.m");
 	initVertices();
 	initFaces();
 	
@@ -174,14 +174,14 @@ void renderScene()
 	glLoadIdentity();
 	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
-	//Adjust starting orientation of scene
-	//glRotatef(300.0f, 1.0f, 0.0f, 0.0f);
-	//glRotatef(350.0f, 0.0f, 0.0f, 1.0f);
-
 	//Handle the translation
 	glTranslatef(tx, ty, 0.0f);
 	//Handle the scaling
 	glScalef(scale_size, scale_size, scale_size);
+	//Handle the rotation
+	glRotatef(x_angle, 1.0f, 0.0f, 0.0f);
+	glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
+	glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
 
 	drawGround();
 	drawAxes();
@@ -899,6 +899,8 @@ void myMouse(int button, int state, int x, int y)
 			xform_mode = TRANSFORM_TRANSLATE;
 		else if (button == GLUT_RIGHT_BUTTON)
 			xform_mode = TRANSFORM_SCALE;
+		else if (button == GLUT_LEFT_BUTTON)
+			xform_mode = TRANSFORM_ROTATE;
 	}
 	//If no button is held down, do not do any transformation
 	else if (state == GLUT_UP)
@@ -912,18 +914,11 @@ void myMotion(int x, int y)
 	{
 		//Update the translation factor based on the difference of current mouse position and previous mouse position
 		//Need to divide by 100.0f or else translation will be too wild
-//		if (y == press_y && x != press_x)
-//		{
-			tx += (x - press_x) / 100.0f;
-//			ty = 0.0f;
-//		}
+		tx += (x - press_x) / 100.0f;
+
 		//For the y translation factor, we do a subtraction of y from press_y 
 		//because in window coordinate system, y value increases as you go down
-//		if (x == press_x && y != press_y)
-//		{
-//			tx = 0.0f;
-			ty += (press_y - y) / 100.0f;
-//		}
+		ty += (press_y - y) / 100.0f;
 	}
 	else if (xform_mode == TRANSFORM_SCALE)
 	{
@@ -936,6 +931,36 @@ void myMotion(int x, int y)
 
 		if (scale_size < 0.0f)
 			scale_size = old_size;
+	}
+	else if (xform_mode == TRANSFORM_ROTATE)
+	{
+		//Handle rotation about x-axis
+		if (x == press_x && y != press_y)
+		{
+			x_angle += (y - press_y) / 5.0f;
+			if (x_angle > 180.0f)
+				x_angle -= 360.0f;
+			else if (x_angle < -180.0f)
+				x_angle += 360.0f;
+		}
+		//Handle rotation about y-axis
+		if (y == press_y && x != press_x)
+		{
+			y_angle += (x - press_x) / 5.0f;
+			if (y_angle > 180.0f)
+				y_angle -= 360.0f;
+			else if (y_angle < -180.0f)
+				y_angle += 360.0f;
+		}
+		//Handle rotation about z-axis
+		if (y != press_y && x != press_x)
+		{
+			z_angle += ((x - press_x) + (press_y - y)) / 5.0f;
+			if (z_angle > 180.0f)
+				z_angle -= 360.0f;
+			else if (z_angle < -180.0f)
+				z_angle += 360.0f;
+		}
 	}
 
 	press_x = x;
