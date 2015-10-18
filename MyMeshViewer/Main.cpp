@@ -151,17 +151,6 @@ int main(int argc, char **argv)
 //Function to draw items in scene
 void renderScene()
 {
-	//Setup OpenGL lighting
-	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
-	GLfloat white_light[] = { 1.0f, 0.0f, 1.0f, 1.0f };			//light color
-	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -186,6 +175,18 @@ void renderScene()
 	drawGround();
 	drawAxes();
 	drawBoundingVol();
+
+	//Setup OpenGL lighting
+	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
+	GLfloat white_light[] = { 1.0f, 0.0f, 1.0f, 1.0f };			//light color
+	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
+
 	//drawModelPoints();
 	//drawModelWireframe();
 	//drawModelFlat();
@@ -934,27 +935,36 @@ void myMotion(int x, int y)
 	}
 	else if (xform_mode == TRANSFORM_ROTATE)
 	{
-		//Handle rotation about x-axis
-		if (x == press_x && y != press_y)
+		//Rotate about x-axis when mouse moves vertically
+		if ((((x - press_x) <= 3.0f) || ((x - press_x) >= -3.0f)) && (y != press_y))
 		{
+			y_angle += 0.0f;
+			z_angle += 0.0f;
+
 			x_angle += (y - press_y) / 5.0f;
 			if (x_angle > 180.0f)
 				x_angle -= 360.0f;
 			else if (x_angle < -180.0f)
 				x_angle += 360.0f;
 		}
-		//Handle rotation about y-axis
-		if (y == press_y && x != press_x)
+		//Rotate about y-axis when mouse moves horizontally
+		if ((((y - press_y) <= 3.0f) || ((y - press_y) >= -3.0f)) && (x != press_x))
 		{
+			x_angle += 0.0f;
+			z_angle += 0.0f;
+
 			y_angle += (x - press_x) / 5.0f;
 			if (y_angle > 180.0f)
 				y_angle -= 360.0f;
 			else if (y_angle < -180.0f)
 				y_angle += 360.0f;
 		}
-		//Handle rotation about z-axis
-		if (y != press_y && x != press_x)
+		//Rotate about z-axis when mouse moves circularly
+		if ((((y - press_y) > 5.0f) || ((y - press_y) < -5.0f)) && (((x - press_x) > 5.0f) || ((x - press_x) < -5.0f)))
 		{
+			x_angle += 0.0f;
+			y_angle += 0.0f;
+
 			z_angle += ((x - press_x) + (press_y - y)) / 5.0f;
 			if (z_angle > 180.0f)
 				z_angle -= 360.0f;
