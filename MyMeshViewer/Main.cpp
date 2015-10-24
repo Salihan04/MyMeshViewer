@@ -13,6 +13,11 @@ using namespace std;
 #define TRANSFORM_SCALE		2
 #define TRANSFORM_TRANSLATE	3
 
+#define OBJ_POINT			0
+#define OBJ_WIREFRAME		1
+#define OBJ_FLAT			2
+#define OBJ_SMOOTH			3
+
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
 
@@ -24,9 +29,11 @@ static float scale_size = 1.0f;
 static float tx = 0.0f;
 static float ty = 0.0f;
 static int xform_mode = 0;
+static int obj_mode = 0;
 
 float minX, minY, minZ, maxX, maxY, maxZ, max;
 bool isLightEnabled = false;
+string filename = "TestModels/";
 
 //Data structures for vertex, face, vector and normal
 typedef struct
@@ -110,8 +117,7 @@ int main(int argc, char **argv)
 	clearData();
 
 	//Initialise data needed for rendering
-	parseFile("TestModels/cap.m");
-	cout << "Model loaded" << endl;
+	parseFile(filename);
 	cout << "Rendering..." << endl;
 	initVertices();
 	initFaces();
@@ -147,6 +153,7 @@ int main(int argc, char **argv)
 	glutMotionFunc(myMotion);
 
 	cout << "Rendering complete" << endl;
+	cout << endl;
 
 	glutMainLoop();
 
@@ -218,23 +225,28 @@ void parseFile(string fileName)
 	if (!infile.is_open())
 		cout << "Cannot open " << fileName << endl;
 
-	while (infile)
+	else
 	{
-		//Read each line of the file as long as end of file is not encountered
-		getline(infile, str);
-		if (infile)
+		while (infile)
 		{
-			//If the line begins with 'Vertex', add to vertices vector
-			if (str[0] == 'V')
-				vertices_string.push_back(str);
-			//If the line begins with 'Face', add to faces vector
-			else if (str[0] == 'F')
-				faces_string.push_back(str);
+			//Read each line of the file as long as end of file is not encountered
+			getline(infile, str);
+			if (infile)
+			{
+				//If the line begins with 'Vertex', add to vertices vector
+				if (str[0] == 'V')
+					vertices_string.push_back(str);
+				//If the line begins with 'Face', add to faces vector
+				else if (str[0] == 'F')
+					faces_string.push_back(str);
+			}
 		}
-	}
 
-	//Close file
-	infile.close();
+		//Close file
+		infile.close();
+
+		cout << "Model loaded" << endl;
+	}
 }
 
 //Function to initialise and populate a collection of vertices based on data from model file
