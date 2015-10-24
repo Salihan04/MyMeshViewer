@@ -159,6 +159,21 @@ void renderScene()
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//Setup OpenGL lighting
+	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
+	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
+	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
+	isLightEnabled = true;
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
 	//Setup the perspective projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -180,18 +195,6 @@ void renderScene()
 	drawGround();
 	drawAxes();
 	drawBoundingVol();
-
-	//Setup OpenGL lighting
-	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
-	GLfloat white_light[] = { 1.0f, 0.0f, 1.0f, 1.0f };			//light color
-	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-	isLightEnabled = true;
 
 	//drawModelPoints();
 	//drawModelWireframe();
@@ -784,20 +787,6 @@ void drawBoundingVol()
 			glVertex3f(maxX, minY, minZ);
 			glVertex3f(minX, minY, minZ);
 		glEnd();
-		//Left face
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(minX, minY, minZ);
-			glVertex3f(minX, minY, maxZ);
-			glVertex3f(minX, maxY, maxZ);
-			glVertex3f(minX, maxY, minZ);
-		glEnd();
-		//Right face
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(maxX, minY, minZ);
-			glVertex3f(maxX, minY, maxZ);
-			glVertex3f(maxX, maxY, maxZ);
-			glVertex3f(maxX, maxY, minZ);
-		glEnd();
 	glPopMatrix();
 }
 
@@ -811,20 +800,18 @@ void drawModelPoints()
 		isLightEnabled = false;
 	}
 
-	glPointSize(2.0f);
+	glPushMatrix();
+		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+		glBegin(GL_POINTS);
+			for (size_t i = 0; i < vertices.size(); i++)
+			{
+				Vertex* v = vertices.at(i);
 
-	for (size_t i = 0; i < vertices.size(); i++)
-	{
-		Vertex* v = vertices.at(i);
-
-		glPushMatrix();
-			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-			glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-			glBegin(GL_POINTS);
 				glVertex3f(v->x, v->y, v->z);
-			glEnd();
-		glPopMatrix();
-	}
+			}
+		glEnd();
+	glPopMatrix();
 }
 
 //Function to draw model as wireframe
@@ -868,25 +855,26 @@ void drawModelFlat()
 	//Use flat shading mode
 	glShadeModel(GL_FLAT);
 
-	for (size_t i = 0; i < faces.size(); i++)
-	{
-		Face* f = faces.at(i);
-		Vertex* v1 = f->v1;
-		Vertex* v2 = f->v2;
-		Vertex* v3 = f->v3;
-		Normal* n1 = perVertexNormals.at(v1->index - 1);
-		Normal* n2 = perVertexNormals.at(v2->index - 1);
-		Normal* n3 = perVertexNormals.at(v3->index - 1);
+	glPushMatrix();
+		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+			for (size_t i = 0; i < faces.size(); i++)
+			{
+				Face* f = faces.at(i);
+				Vertex* v1 = f->v1;
+				Vertex* v2 = f->v2;
+				Vertex* v3 = f->v3;
+				Normal* n1 = perVertexNormals.at(v1->index - 1);
+				Normal* n2 = perVertexNormals.at(v2->index - 1);
+				Normal* n3 = perVertexNormals.at(v3->index - 1);
 
-		glPushMatrix();
-			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-			glBegin(GL_TRIANGLES);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-			glEnd();
-		glPopMatrix();
-	}
+				glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+				glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+				glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+			}
+		glEnd();
+	glPopMatrix();
 }
 
 //Function to draw model with smooth shading
@@ -902,25 +890,26 @@ void drawModelSmooth()
 	//Use flat shading mode
 	glShadeModel(GL_SMOOTH);
 
-	for (size_t i = 0; i < faces.size(); i++)
-	{
-		Face* f = faces.at(i);
-		Vertex* v1 = f->v1;
-		Vertex* v2 = f->v2;
-		Vertex* v3 = f->v3;
-		Normal* n1 = perVertexNormals.at(v1->index - 1);
-		Normal* n2 = perVertexNormals.at(v2->index - 1);
-		Normal* n3 = perVertexNormals.at(v3->index - 1);
-
-		glPushMatrix();
-			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-			glBegin(GL_TRIANGLES);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-			glEnd();
-		glPopMatrix();
-	}
+	glPushMatrix();
+		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+			for (size_t i = 0; i < faces.size(); i++)
+			{
+				Face* f = faces.at(i);
+				Vertex* v1 = f->v1;
+				Vertex* v2 = f->v2;
+				Vertex* v3 = f->v3;
+				Normal* n1 = perVertexNormals.at(v1->index - 1);
+				Normal* n2 = perVertexNormals.at(v2->index - 1);
+				Normal* n3 = perVertexNormals.at(v3->index - 1);
+		
+				glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+				glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+				glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+			}
+		glEnd();
+	glPopMatrix();
 }
 
 //Function to capture mouse information such as button clicked and position in window
