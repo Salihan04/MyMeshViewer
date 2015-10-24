@@ -110,6 +110,7 @@ void drawModelFlat();
 void drawModelSmooth();
 void myMouse(int button, int state, int x, int y);
 void myMotion(int x, int y);
+void mykey(unsigned char key, int x, int y);
 
 int main(int argc, char **argv)
 {
@@ -151,6 +152,7 @@ int main(int argc, char **argv)
 	glutDisplayFunc(renderScene);
 	glutMouseFunc(myMouse);
 	glutMotionFunc(myMotion);
+	glutKeyboardFunc(mykey);
 
 	cout << "Rendering complete" << endl;
 	cout << endl;
@@ -203,10 +205,14 @@ void renderScene()
 	drawAxes();
 	drawBoundingVol();
 
-	//drawModelPoints();
-	//drawModelWireframe();
-	//drawModelFlat();
-	drawModelSmooth();
+	if(obj_mode == OBJ_POINT)
+		drawModelPoints();
+	else if(obj_mode == OBJ_WIREFRAME)
+		drawModelWireframe();
+	else if(obj_mode == OBJ_FLAT)
+		drawModelFlat();
+	else
+		drawModelSmooth();
 
 	//Swap the buffers
 	glutSwapBuffers();
@@ -1012,6 +1018,33 @@ void myMotion(int x, int y)
 
 	press_x = x;
 	press_y = y;
+
+	//Force the redraw function
+	glutPostRedisplay();
+}
+
+//Function to handle keyboard input
+void mykey(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	case 'p':
+		cout << "key 'p' is pressed! draw the object in point mode" << endl;
+		obj_mode = OBJ_POINT;
+		break;
+	case 'w':
+		cout << "key 'w' is pressed! draw the object in wireframe mode " << endl;
+		obj_mode = OBJ_WIREFRAME;
+		break;
+	case 'f':
+		cout << "key 'f' is pressed! draw the object in flat mode" << endl;
+		obj_mode = OBJ_FLAT;
+		break;
+	case 's':
+		cout << "key 's' is pressed! draw the object in smooth mode" << endl;
+		obj_mode = OBJ_SMOOTH;
+		break;
+	}
 
 	//Force the redraw function
 	glutPostRedisplay();
