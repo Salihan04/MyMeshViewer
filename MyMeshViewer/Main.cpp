@@ -111,28 +111,10 @@ void drawModelSmooth();
 void myMouse(int button, int state, int x, int y);
 void myMotion(int x, int y);
 void mykey(unsigned char key, int x, int y);
+void init(string filename);
 
 int main(int argc, char **argv)
 {
-	//Reset data
-	clearData();
-
-	//Initialise data needed for rendering
-	parseFile(filename);
-	cout << "Rendering..." << endl;
-	initVertices();
-	initFaces();
-	
-	//Initialise half-edge data structures
-	initHEMaps();
-	assocPairToEdge();
-
-	//Initialise per face normals and per vertex normals
-	initPerFaceNormals();
-	initPerVertexNormals();
-
-	findBoundingVolDimensions();
-
 	//Initialising Glut
 	glutInit(&argc, argv);
 	//Use double buffer to get better results on animation
@@ -154,8 +136,7 @@ int main(int argc, char **argv)
 	glutMotionFunc(myMotion);
 	glutKeyboardFunc(mykey);
 
-	cout << "Rendering complete" << endl;
-	cout << endl;
+	init(filename);
 
 	glutMainLoop();
 
@@ -229,7 +210,7 @@ void parseFile(string fileName)
 
 	//Check if file has been opened
 	if (!infile.is_open())
-		cout << "Cannot open " << fileName << endl;
+		cout << "Cannot open " << fileName << ". Please press key 1-8 to draw model" << endl;
 
 	else
 	{
@@ -1029,23 +1010,89 @@ void mykey(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'p':
-		cout << "key 'p' is pressed! draw the object in point mode" << endl;
+		cout << "key 'p' is pressed! Draw the object in point mode" << endl;
 		obj_mode = OBJ_POINT;
 		break;
 	case 'w':
-		cout << "key 'w' is pressed! draw the object in wireframe mode " << endl;
+		cout << "key 'w' is pressed! Draw the object in wireframe mode " << endl;
 		obj_mode = OBJ_WIREFRAME;
 		break;
 	case 'f':
-		cout << "key 'f' is pressed! draw the object in flat mode" << endl;
+		cout << "key 'f' is pressed! Draw the object in flat mode" << endl;
 		obj_mode = OBJ_FLAT;
 		break;
 	case 's':
-		cout << "key 's' is pressed! draw the object in smooth mode" << endl;
+		cout << "key 's' is pressed! Draw the object in smooth mode" << endl;
 		obj_mode = OBJ_SMOOTH;
+		break;
+	case '1':
+		cout << "key '1' is pressed! Draw the bimba model" << endl;
+		filename = "TestModels/" + testModels[0];
+		init(filename);
+		break;
+	case '2':
+		cout << "key '2' is pressed! Draw the bottle model" << endl;
+		filename = "TestModels/" + testModels[1];
+		init(filename);
+		break;
+	case '3':
+		cout << "key '3' is pressed! Draw the bunny model" << endl;
+		filename = "TestModels/" + testModels[2];
+		init(filename);
+		break;
+	case '4':
+		cout << "key '4' is pressed! Draw the cap model" << endl;
+		filename = "TestModels/" + testModels[3];
+		init(filename);
+		break;
+	case '5':
+		cout << "key '5' is pressed! Draw the eight model" << endl;
+		filename = "TestModels/" + testModels[4];
+		init(filename);
+		break;
+	case '6':
+		cout << "key '6' is pressed! Draw the gargoyle model" << endl;
+		filename = "TestModels/" + testModels[5];
+		init(filename);
+		break;
+	case '7':
+		cout << "key '7' is pressed! Draw the knot model" << endl;
+		filename = "TestModels/" + testModels[6];
+		init(filename);
+		break;
+	case '8':
+		cout << "key '8' is pressed! Draw the statute model" << endl;
+		filename = "TestModels/" + testModels[7];
+		init(filename);
 		break;
 	}
 
 	//Force the redraw function
 	glutPostRedisplay();
+}
+
+//Initialise data for model
+void init(string filename)
+{
+	//Reset data
+	clearData();
+
+	//Initialise data needed for rendering
+	parseFile(filename);
+	cout << "Rendering..." << endl;
+	initVertices();
+	initFaces();
+
+	//Initialise half-edge data structures
+	initHEMaps();
+	assocPairToEdge();
+
+	//Initialise per face normals and per vertex normals
+	initPerFaceNormals();
+	initPerVertexNormals();
+
+	findBoundingVolDimensions();
+
+	cout << "Rendering complete" << endl;
+	cout << endl;
 }
