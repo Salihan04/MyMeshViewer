@@ -820,7 +820,7 @@ void mykey(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'p':
-		cout << "Key 'p' is pressed! Draw the object in point mode" << endl;
+		cout << "Key 'p' is pressed! Draw the object in point cloud mode" << endl;
 		obj_mode = OBJ_POINT;
 		break;
 	case 'w':
