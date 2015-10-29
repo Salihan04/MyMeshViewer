@@ -41,11 +41,59 @@ void renderScene()
 	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
 	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	//glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	//glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
+	//glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+
+	GLfloat light0[] = { 10.0f, 10.0f, 10.0f, 0.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+
+	GLfloat light1[] = { 0.0f, -10.0f, 0.0f, 0.0f };
+	glLightfv(GL_LIGHT1, GL_POSITION, light1);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, white_light);
+
+	GLfloat light2[] = { 0.0f, 0.0f, 10.0f, 0.0f };
+	glLightfv(GL_LIGHT2, GL_POSITION, light2);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, white_light);
+
+	GLfloat light3[] = { 0.0f, 10.0f, 0.0f, 0.0f };
+	glLightfv(GL_LIGHT3, GL_POSITION, light3);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT3, GL_SPECULAR, white_light);
+
+	GLfloat light4[] = { 0.0f, 10.0f, 10.0f, 0.0f };
+	glLightfv(GL_LIGHT4, GL_POSITION, light4);
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT4, GL_SPECULAR, white_light);
+
+	GLfloat light5[] = { 10.0f, 0.0f, 0.0f, 0.0f };
+	glLightfv(GL_LIGHT5, GL_POSITION, light5);
+	glLightfv(GL_LIGHT5, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT5, GL_SPECULAR, white_light);
+
+	GLfloat light6[] = { 10.0f, 0.0f, 10.0f, 0.0f };
+	glLightfv(GL_LIGHT6, GL_POSITION, light6);
+	glLightfv(GL_LIGHT6, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT6, GL_SPECULAR, white_light);
+
+	GLfloat light7[] = { 10.0f, 10.0f, 0.0f, 0.0f };
+	glLightfv(GL_LIGHT7, GL_POSITION, light7);
+	glLightfv(GL_LIGHT7, GL_DIFFUSE, white_light);
+	glLightfv(GL_LIGHT7, GL_SPECULAR, white_light);
+
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT3);
+	glEnable(GL_LIGHT4);
+	glEnable(GL_LIGHT5);
+	glEnable(GL_LIGHT6);
+	glEnable(GL_LIGHT7);
 	glEnable(GL_LIGHTING);
 	isLightEnabled = true;
 
@@ -74,11 +122,11 @@ void renderScene()
 	drawAxes();
 	drawBoundingVol();
 
-	if(obj_mode == OBJ_POINT)
+	if (obj_mode == OBJ_POINT)
 		drawModelPoints();
-	else if(obj_mode == OBJ_WIREFRAME)
+	else if (obj_mode == OBJ_WIREFRAME)
 		drawModelWireframe();
-	else if(obj_mode == OBJ_FLAT)
+	else if (obj_mode == OBJ_FLAT)
 		drawModelFlat();
 	else
 		drawModelSmooth();
@@ -663,26 +711,28 @@ void drawModelFlat()
 
 	//Use flat shading mode
 	glShadeModel(GL_FLAT);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
 
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-		glBegin(GL_TRIANGLES);
-			for (size_t i = 0; i < faces.size(); i++)
-			{
-				Face* f = faces.at(i);
-				Vertex* v1 = f->v1;
-				Vertex* v2 = f->v2;
-				Vertex* v3 = f->v3;
-				Normal* n1 = perVertexNormals.at(v1->index - 1);
-				Normal* n2 = perVertexNormals.at(v2->index - 1);
-				Normal* n3 = perVertexNormals.at(v3->index - 1);
+	glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+	//glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+	glBegin(GL_TRIANGLES);
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		Vertex* v1 = f->v1;
+		Vertex* v2 = f->v2;
+		Vertex* v3 = f->v3;
+		Normal* n1 = perVertexNormals.at(v1->index - 1);
+		Normal* n2 = perVertexNormals.at(v2->index - 1);
+		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
-				glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-				glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-				glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-			}
-		glEnd();
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+	}
+	glEnd();
 	glPopMatrix();
 }
 
@@ -698,26 +748,28 @@ void drawModelSmooth()
 
 	//Use flat shading mode
 	glShadeModel(GL_SMOOTH);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
 
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-		glBegin(GL_TRIANGLES);
-			for (size_t i = 0; i < faces.size(); i++)
-			{
-				Face* f = faces.at(i);
-				Vertex* v1 = f->v1;
-				Vertex* v2 = f->v2;
-				Vertex* v3 = f->v3;
-				Normal* n1 = perVertexNormals.at(v1->index - 1);
-				Normal* n2 = perVertexNormals.at(v2->index - 1);
-				Normal* n3 = perVertexNormals.at(v3->index - 1);
-		
-				glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-				glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-				glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-			}
-		glEnd();
+	glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+	//glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+	glBegin(GL_TRIANGLES);
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		Face* f = faces.at(i);
+		Vertex* v1 = f->v1;
+		Vertex* v2 = f->v2;
+		Vertex* v3 = f->v3;
+		Normal* n1 = perVertexNormals.at(v1->index - 1);
+		Normal* n2 = perVertexNormals.at(v2->index - 1);
+		Normal* n3 = perVertexNormals.at(v3->index - 1);
+
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+	}
+	glEnd();
 	glPopMatrix();
 }
 
