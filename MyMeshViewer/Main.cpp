@@ -39,7 +39,7 @@ void renderScene()
 
 	//Setup OpenGL lighting
 	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
-	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
+	GLfloat white_light[] = { 100.0f, 100.0f, 100.0f, 100.0f };	//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
 	//glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	//glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
@@ -97,7 +97,7 @@ void renderScene()
 	glEnable(GL_LIGHTING);
 	isLightEnabled = true;
 
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
 	//Setup the perspective projection
@@ -711,12 +711,12 @@ void drawModelFlat()
 
 	//Use flat shading mode
 	glShadeModel(GL_FLAT);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
 	glPushMatrix();
 	glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-	//glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+	glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
 	glBegin(GL_TRIANGLES);
 	for (size_t i = 0; i < faces.size(); i++)
 	{
@@ -728,9 +728,9 @@ void drawModelFlat()
 		Normal* n2 = perVertexNormals.at(v2->index - 1);
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+		glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+		glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+		glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
 	}
 	glEnd();
 	glPopMatrix();
@@ -748,12 +748,12 @@ void drawModelSmooth()
 
 	//Use flat shading mode
 	glShadeModel(GL_SMOOTH);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
 	glPushMatrix();
 	glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-	//glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+	glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
 	glBegin(GL_TRIANGLES);
 	for (size_t i = 0; i < faces.size(); i++)
 	{
@@ -765,9 +765,9 @@ void drawModelSmooth()
 		Normal* n2 = perVertexNormals.at(v2->index - 1);
 		Normal* n3 = perVertexNormals.at(v3->index - 1);
 
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-		glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+		glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+		glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+		glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
 	}
 	glEnd();
 	glPopMatrix();
