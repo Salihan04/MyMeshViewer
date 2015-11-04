@@ -39,7 +39,7 @@ void renderScene()
 
 	//Setup OpenGL lighting
 	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
-	GLfloat white_light[] = { 100.0f, 100.0f, 100.0f, 100.0f };	//light color
+	GLfloat white_light[] = { 1000.0f, 1000.0f, 1000.0f, 1000.0f };	//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
 	//glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	//glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
@@ -51,22 +51,22 @@ void renderScene()
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
 
-	GLfloat light1[] = { 0.0f, -10.0f, 0.0f, 0.0f };
+	GLfloat light1[] = { 10.0f, 0.0f, 10.0f, 0.0f };
 	glLightfv(GL_LIGHT1, GL_POSITION, light1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, white_light);
 
-	GLfloat light2[] = { 0.0f, 0.0f, 10.0f, 0.0f };
+	GLfloat light2[] = { 0.0f, 10.0f, 10.0f, 0.0f };
 	glLightfv(GL_LIGHT2, GL_POSITION, light2);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT2, GL_SPECULAR, white_light);
 
-	GLfloat light3[] = { 0.0f, 10.0f, 0.0f, 0.0f };
+	GLfloat light3[] = { 0.0f, 0.0f, 10.0f, 0.0f };
 	glLightfv(GL_LIGHT3, GL_POSITION, light3);
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT3, GL_SPECULAR, white_light);
 
-	GLfloat light4[] = { 0.0f, 10.0f, 10.0f, 0.0f };
+	GLfloat light4[] = { 10.0f, 10.0f, 0.0f, 0.0f };
 	glLightfv(GL_LIGHT4, GL_POSITION, light4);
 	glLightfv(GL_LIGHT4, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT4, GL_SPECULAR, white_light);
@@ -76,12 +76,12 @@ void renderScene()
 	glLightfv(GL_LIGHT5, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT5, GL_SPECULAR, white_light);
 
-	GLfloat light6[] = { 10.0f, 0.0f, 10.0f, 0.0f };
+	GLfloat light6[] = { 0.0f, 10.0f, 0.0f, 0.0f };
 	glLightfv(GL_LIGHT6, GL_POSITION, light6);
 	glLightfv(GL_LIGHT6, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT6, GL_SPECULAR, white_light);
 
-	GLfloat light7[] = { 10.0f, 10.0f, 0.0f, 0.0f };
+	GLfloat light7[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 	glLightfv(GL_LIGHT7, GL_POSITION, light7);
 	glLightfv(GL_LIGHT7, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT7, GL_SPECULAR, white_light);
@@ -401,7 +401,7 @@ vector<Face*> findAdjFaces(Vertex* v)
 	HE_edge* out_edge = vert->edge;
 	HE_edge* curr = out_edge;
 	vector<Face*> adjFaces;
-	
+
 	adjFaces.push_back(faces.at(curr->face->index - 1));
 
 	//Using one-ring neighbour algo to find and add to collection of adjacent faces
@@ -427,14 +427,15 @@ float calcFaceArea(Normal* n)
 //Function to calculate vertex normal
 Normal* vertexNormal(Vertex* v)
 {
-	float totalArea = 0.0f;
-	float faceArea;
-	vector<float> faceAreas;
+	//float totalArea = 0.0f;
+	//float faceArea;
+	//vector<float> faceAreas;
 	Normal* n = new Normal();
 	n->x = 0.0f;
 	n->y = 0.0f;
 	n->z = 0.0f;
 
+	/*
 	//Get all faces adjacent to the vertex
 	vector<Face*> adjFaces = findAdjFaces(v);
 
@@ -474,6 +475,24 @@ Normal* vertexNormal(Vertex* v)
 		n->y += weight * faceNormal->y;
 		n->z += weight * faceNormal->z;
 	}
+	*/
+
+	HE_vert* vert = HE_verts[v->index];
+	int count = 0;
+	HE_edge* out_edge = vert->edge;
+	HE_edge* curr = out_edge;
+
+	do
+	{
+		count++;
+		n->x += perFaceNormals.at(curr->face->index - 1)->x;
+		n->y += perFaceNormals.at(curr->face->index - 1)->y;
+		n->z += perFaceNormals.at(curr->face->index - 1)->z;
+	} while (curr != out_edge);
+
+	n->x /= count;
+	n->y /= count;
+	n->z /= count;
 
 	return n;
 }
@@ -614,7 +633,7 @@ void findBoundingVolDimensions()
 void drawBoundingVol()
 {
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glScalef(1 / max, 1 / max, 1 / max);
 		glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 		//Back face
 		glBegin(GL_LINE_LOOP);
@@ -657,8 +676,10 @@ void drawModelPoints()
 		isLightEnabled = false;
 	}
 
+	glPointSize(3.0f);
+
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glScalef(1 / max, 1 / max, 1 / max);
 		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 		glBegin(GL_POINTS);
 			for (size_t i = 0; i < vertices.size(); i++)
@@ -689,11 +710,12 @@ void drawModelWireframe()
 		Vertex* v3 = f->v3;
 
 		glPushMatrix();
-			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+			glScalef(1 / max, 1 / max, 1 / max);
+			glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 			glBegin(GL_LINE_LOOP);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v1->x, v1->y, v1->z);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v2->x, v2->y, v2->z);
-				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v3->x, v3->y, v3->z);
+				glVertex3f(v1->x, v1->y, v1->z);
+				glVertex3f(v2->x, v2->y, v2->z);
+				glVertex3f(v3->x, v3->y, v3->z);
 			glEnd();
 		glPopMatrix();
 	}
@@ -715,24 +737,24 @@ void drawModelFlat()
 	glEnable(GL_COLOR_MATERIAL);
 
 	glPushMatrix();
-	glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-	glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
-	for (size_t i = 0; i < faces.size(); i++)
-	{
-		Face* f = faces.at(i);
-		Vertex* v1 = f->v1;
-		Vertex* v2 = f->v2;
-		Vertex* v3 = f->v3;
-		Normal* n1 = perVertexNormals.at(v1->index - 1);
-		Normal* n2 = perVertexNormals.at(v2->index - 1);
-		Normal* n3 = perVertexNormals.at(v3->index - 1);
+		glScalef(1 / max, 1 / max, 1 / max);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+			for (size_t i = 0; i < faces.size(); i++)
+			{
+				Face* f = faces.at(i);
+				Vertex* v1 = f->v1;
+				Vertex* v2 = f->v2;
+				Vertex* v3 = f->v3;
+				Normal* n1 = perVertexNormals.at(v1->index - 1);
+				Normal* n2 = perVertexNormals.at(v2->index - 1);
+				Normal* n3 = perVertexNormals.at(v3->index - 1);
 
-		glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-		glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-		glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-	}
-	glEnd();
+				glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+				glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+				glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+			}
+		glEnd();
 	glPopMatrix();
 }
 
@@ -752,24 +774,24 @@ void drawModelSmooth()
 	glEnable(GL_COLOR_MATERIAL);
 
 	glPushMatrix();
-	glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
-	glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
-	for (size_t i = 0; i < faces.size(); i++)
-	{
-		Face* f = faces.at(i);
-		Vertex* v1 = f->v1;
-		Vertex* v2 = f->v2;
-		Vertex* v3 = f->v3;
-		Normal* n1 = perVertexNormals.at(v1->index - 1);
-		Normal* n2 = perVertexNormals.at(v2->index - 1);
-		Normal* n3 = perVertexNormals.at(v3->index - 1);
+		glScalef(1 / max, 1 / max, 1 / max);
+		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+			for (size_t i = 0; i < faces.size(); i++)
+			{
+				Face* f = faces.at(i);
+				Vertex* v1 = f->v1;
+				Vertex* v2 = f->v2;
+				Vertex* v3 = f->v3;
+				Normal* n1 = perVertexNormals.at(v1->index - 1);
+				Normal* n2 = perVertexNormals.at(v2->index - 1);
+				Normal* n3 = perVertexNormals.at(v3->index - 1);
 
-		glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
-		glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
-		glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
-	}
-	glEnd();
+				glNormal3f(n1->x, n1->y, n1->z); glVertex3f(v1->x, v1->y, v1->z);
+				glNormal3f(n2->x, n2->y, n2->z); glVertex3f(v2->x, v2->y, v2->z);
+				glNormal3f(n3->x, n3->y, n3->z); glVertex3f(v3->x, v3->y, v3->z);
+			}
+		glEnd();
 	glPopMatrix();
 }
 
