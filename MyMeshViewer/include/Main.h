@@ -21,6 +21,10 @@ using namespace std;
 #define OBJ_FLAT			2
 #define OBJ_SMOOTH			3
 
+//projection modes
+#define VIEW_PERS   0
+#define VIEW_ORTH   1
+
 static int window;
 static string testModels[] = { "bimba.m",  "bottle.m", "bunny.m", "cap.m", "eight.m", "gargoyle.m", "knot.m", "statute.m" };
 
@@ -33,6 +37,7 @@ static float tx = 0.0f;
 static float ty = 0.0f;
 static int xform_mode = 0;
 static int obj_mode = 0;
+static int view_mode = 0;
 
 float minX, minY, minZ, maxX, maxY, maxZ, max;
 bool isLightEnabled = false;

@@ -52,11 +52,18 @@ void renderScene()
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
-	//Setup the perspective projection
+	//Setup the projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0, 1.0, 0.1, 100.0);
-
+	switch (view_mode)
+	{
+	case VIEW_PERS:
+		gluPerspective(60.0, 1.0, 0.1, 100.0);
+		break;
+	case VIEW_ORTH:
+		glOrtho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1, 100.0);
+	}
+	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
@@ -819,6 +826,28 @@ void mykey(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
+	case 32:	//Spacebar
+		if (view_mode == VIEW_PERS)
+		{
+			view_mode = VIEW_ORTH;
+			cout << "Spacebar pressed! Change projection from perspective to orthographic" << endl;
+		}
+		else
+		{
+			view_mode = VIEW_PERS;
+			cout << "Spacebar pressed! Change projection from orthographic to perspective" << endl;
+		}
+		break;
+	case 'r':
+		x_angle = 0.0f;
+		y_angle = 0.0f;
+		z_angle = 0.0f;
+		scale_size = 1.0f;
+		tx = 0.0f;
+		ty = 0.0f;
+
+		cout << "Key 'r' pressed! Reset any transformation" << endl;
+		break;
 	case 'p':
 		cout << "Key 'p' is pressed! Draw the object in point cloud mode" << endl;
 		obj_mode = OBJ_POINT;
