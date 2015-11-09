@@ -573,7 +573,8 @@ void findBoundingVolDimensions()
 void drawBoundingVol()
 {
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glScalef(1 / max, 1 / max, 1 / max);
+		//glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 		glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 		//Back face
 		glBegin(GL_LINE_LOOP);
@@ -617,7 +618,7 @@ void drawModelPoints()
 	}
 
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glScalef(1 / max, 1 / max, 1 / max);
 		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 		glBegin(GL_POINTS);
 			for (size_t i = 0; i < vertices.size(); i++)
@@ -648,7 +649,7 @@ void drawModelWireframe()
 		Vertex* v3 = f->v3;
 
 		glPushMatrix();
-			glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+			glScalef(1 / max, 1 / max, 1 / max);
 			glBegin(GL_LINE_LOOP);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v1->x, v1->y, v1->z);
 				glColor4f(1.0f, 0.0f, 1.0f, 1.0f); glVertex3f(v2->x, v2->y, v2->z);
@@ -672,7 +673,7 @@ void drawModelFlat()
 	glShadeModel(GL_FLAT);
 
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glScalef(1 / max, 1 / max, 1 / max);
 		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 			for (size_t i = 0; i < faces.size(); i++)
@@ -707,7 +708,7 @@ void drawModelSmooth()
 	glShadeModel(GL_SMOOTH);
 
 	glPushMatrix();
-		glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
+		glScalef(1 / max, 1 / max, 1 / max);
 		glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 			for (size_t i = 0; i < faces.size(); i++)
