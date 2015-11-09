@@ -93,6 +93,7 @@ vector<Normal*> perVertexNormals;
 map<pair<int, int>, HE_edge*> HE_edges;
 map<int, HE_vert*> HE_verts;
 map<int, HE_face*> HE_faces;
+map<int, vector<Face*>> aFaces;
 
 //Function prototypes
 void renderScene();

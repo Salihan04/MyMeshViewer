@@ -38,8 +38,8 @@ void renderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Setup OpenGL lighting
-	GLfloat light_position[] = { -5.0f, 1.0f, -5.0f, 0.0f };	//light position
-	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
+	GLfloat light_position[] = { 5.0f, 1.0f, 5.0f, 0.0f };	//light position
+	GLfloat white_light[] = { 10000.0f, 10000.0f, 10000.0f, 10000.0f };			//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
@@ -216,6 +216,9 @@ void initHEMaps()
 		if(HE_edges.count(make_pair(f->v1->index, f->v2->index)) == 0)
 			HE_edges[make_pair(f->v1->index, f->v2->index)] = edge;
 
+		//add face to vector of adjacent faces for v1
+		aFaces[f->v1->index].push_back(f);
+
 		//2nd edge
 		HE_edge* next = new HE_edge();
 		vert = new HE_vert();
@@ -237,6 +240,9 @@ void initHEMaps()
 		if (HE_edges.count(make_pair(f->v2->index, f->v3->index)) == 0)
 			HE_edges[make_pair(f->v2->index, f->v3->index)] = next;
 
+		//add face to vector of adjacent faces for v2
+		aFaces[f->v2->index].push_back(f);
+
 		//3rd edge
 		HE_edge* prev = new HE_edge();
 		vert = new HE_vert();
@@ -257,6 +263,9 @@ void initHEMaps()
 		prev->face = face;
 		if (HE_edges.count(make_pair(f->v3->index, f->v1->index)) == 0)
 			HE_edges[make_pair(f->v3->index, f->v1->index)] = prev;
+
+		//add face to vector of adjacent faces for v3
+		aFaces[f->v3->index].push_back(f);
 
 		//Link up 1st, 2nd, and 3rd edges with each other
 		edge->next = next;
@@ -318,25 +327,25 @@ void assocPairToEdge()
 //Function to find normal of a face
 Normal* faceNormal(Face* f)
 {
-	Vector* v1 = new Vector();
-	Vector* v2 = new Vector();
+	Vector* vec1 = new Vector();
+	Vector* vec2 = new Vector();
 	Normal* n = new Normal();
 
 	//Init v1 which is a vector of 1 edge of face
-	v1->x = f->v1->x - f->v2->x;
-	v1->y = f->v1->y - f->v2->y;
-	v1->z = f->v1->z - f->v2->z;
+	vec1->x = f->v2->x - f->v1->x;
+	vec1->y = f->v2->y - f->v1->y;
+	vec1->z = f->v2->z - f->v1->z;
 
 	//Init v2 which is a vector of another edge of face
-	v2->x = f->v3->x - f->v2->x;
-	v2->y = f->v3->y - f->v2->y;
-	v2->z = f->v3->z - f->v2->z;
+	vec2->x = f->v3->x - f->v1->x;
+	vec2->y = f->v3->y - f->v1->y;
+	vec2->z = f->v3->z - f->v1->z;
 
 	//Normal is found by applying cross product on the 2 vectors
 	//Cross product's formula for x, y, and z coordinates as shown below
-	n->x = (v1->y * v2->z) - (v1->z * v2->y);
-	n->y = (v1->z * v2->x) - (v1->x - v2->z);
-	n->z = (v1->x * v2->y) - (v1->y * v2->x);
+	n->x = (vec1->y * vec2->z) - (vec1->z * vec2->y);
+	n->y = (vec1->z * vec2->x) - (vec1->x - vec2->z);
+	n->z = (vec1->x * vec2->y) - (vec1->y * vec2->x);
 
 	return n;
 }
@@ -361,14 +370,16 @@ vector<Face*> findAdjFaces(Vertex* v)
 	HE_edge* curr = out_edge;
 	vector<Face*> adjFaces;
 	
-	adjFaces.push_back(faces.at(curr->face->index - 1));
+	//adjFaces.push_back(faces.at(curr->face->index - 1));
 
-	//Using one-ring neighbour algo to find and add to collection of adjacent faces
-	while ((curr->pair != NULL) && (curr->pair->next != out_edge))
-	{
-		curr = curr->pair->next;
-		adjFaces.push_back(faces.at(curr->face->index - 1));
-	}
+	////Using one-ring neighbour algo to find and add to collection of adjacent faces
+	//while ((curr->pair != NULL) && (curr->pair->next != out_edge))
+	//{
+	//	curr = curr->pair->next;
+	//	adjFaces.push_back(faces.at(curr->face->index - 1));
+	//}
+
+	adjFaces = aFaces[v->index];
 
 	return adjFaces;
 }
@@ -464,6 +475,7 @@ void clearData()
 	HE_verts.clear();
 	HE_faces.clear();
 	HE_edges.clear();
+	aFaces.clear();
 }
 
 //Function to draw grid lines on the ground which is the xy plane
@@ -574,7 +586,6 @@ void drawBoundingVol()
 {
 	glPushMatrix();
 		glScalef(1 / max, 1 / max, 1 / max);
-		//glScalef(1 / (max - minX), 1 / (max - minY), 1 / (max - minZ));
 		glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 		//Back face
 		glBegin(GL_LINE_LOOP);
