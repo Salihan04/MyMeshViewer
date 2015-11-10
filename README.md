@@ -34,7 +34,7 @@ The Mesh Viewer is an easy to use lightweight application for displaying three d
 <b>Note: </b>This project was done as a school assignment. GLUT was used in this project. 
 
 ##Screenshots
-###1) Render as Points
+###1) Render as Point Cloud
 ![alt tag](https://github.com/Salihan04/MyMeshViewer/blob/master/Screenshots/ModelPoint.PNG)
 ###2) Render as Wireframe
 ![alt tag](https://github.com/Salihan04/MyMeshViewer/blob/master/Screenshots/ModelWireframe.PNG)
