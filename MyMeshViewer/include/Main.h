@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <math.h>
 
 using namespace std;
 
@@ -38,6 +39,7 @@ static float ty = 0.0f;
 static int xform_mode = 0;
 static int obj_mode = 0;
 static int view_mode = 0;
+static float whiteLightValue = 1.0f;
 
 float minX, minY, minZ, maxX, maxY, maxZ, max;
 bool isLightEnabled = false;
@@ -120,6 +122,7 @@ void drawModelSmooth();
 void myMouse(int button, int state, int x, int y);
 void myMotion(int x, int y);
 void mykey(unsigned char key, int x, int y);
+void mySpecial(int key, int x, int y);
 void init(string filename);
 
 #endif

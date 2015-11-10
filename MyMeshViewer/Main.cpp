@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 	glutMouseFunc(myMouse);
 	glutMotionFunc(myMotion);
 	glutKeyboardFunc(mykey);
+	glutSpecialFunc(mySpecial);
 
 	init(filename);
 
@@ -38,8 +39,8 @@ void renderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Setup OpenGL lighting
-	GLfloat light_position[] = { 5.0f, 1.0f, 5.0f, 0.0f };	//light position
-	GLfloat white_light[] = { 10000.0f, 10000.0f, 10000.0f, 10000.0f };			//light color
+	GLfloat light_position[] = { 5.0f, 1.0f, 5.0f, 0.0f };											//light position
+	GLfloat white_light[] = { whiteLightValue, whiteLightValue, whiteLightValue, whiteLightValue };	//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
@@ -880,41 +881,68 @@ void mykey(unsigned char key, int x, int y)
 		cout << "Key '1' is pressed! Draw the bimba model" << endl;
 		filename = "TestModels/" + testModels[0];
 		init(filename);
+		whiteLightValue = 1.0f * powf(10.0f, 10.0f);
 		break;
 	case '2':
 		cout << "Key '2' is pressed! Draw the bottle model" << endl;
 		filename = "TestModels/" + testModels[1];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '3':
 		cout << "Key '3' is pressed! Draw the bunny model" << endl;
 		filename = "TestModels/" + testModels[2];
 		init(filename);
+		whiteLightValue = 1.0f * powf(10.0f, 10.0f);
 		break;
 	case '4':
 		cout << "Key '4' is pressed! Draw the cap model" << endl;
 		filename = "TestModels/" + testModels[3];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '5':
 		cout << "Key '5' is pressed! Draw the eight model" << endl;
 		filename = "TestModels/" + testModels[4];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '6':
 		cout << "Key '6' is pressed! Draw the gargoyle model" << endl;
 		filename = "TestModels/" + testModels[5];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '7':
 		cout << "Key '7' is pressed! Draw the knot model" << endl;
 		filename = "TestModels/" + testModels[6];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '8':
 		cout << "Key '8' is pressed! Draw the statute model" << endl;
 		filename = "TestModels/" + testModels[7];
 		init(filename);
+		whiteLightValue = 1.0f;
+		break;
+	}
+
+	//Force the redraw function
+	glutPostRedisplay();
+}
+
+//Function to handle special keyboard input
+void mySpecial(int key, int x, int y)
+{
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+		if (whiteLightValue < 1.0f * powf(10.0f, 10.0f));
+			whiteLightValue *= 100.0f;
+		break;
+	case GLUT_KEY_DOWN:
+		if (whiteLightValue > 1.0f)
+			whiteLightValue /= 100.0f;
 		break;
 	}
 
