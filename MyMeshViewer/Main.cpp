@@ -365,23 +365,23 @@ void initPerFaceNormals()
 //Function to find the faces adjacent to a vertex
 vector<Face*> findAdjFaces(Vertex* v)
 {
+	/*
 	HE_vert* vert = HE_verts[v->index];
 	HE_edge* out_edge = vert->edge;
 	HE_edge* curr = out_edge;
 	vector<Face*> adjFaces;
 	
-	//adjFaces.push_back(faces.at(curr->face->index - 1));
+	adjFaces.push_back(faces.at(curr->face->index - 1));
 
-	////Using one-ring neighbour algo to find and add to collection of adjacent faces
-	//while ((curr->pair != NULL) && (curr->pair->next != out_edge))
-	//{
-	//	curr = curr->pair->next;
-	//	adjFaces.push_back(faces.at(curr->face->index - 1));
-	//}
+	//Using one-ring neighbour algo to find and add to collection of adjacent faces
+	while ((curr->pair != NULL) && (curr->pair->next != out_edge))
+	{
+		curr = curr->pair->next;
+		adjFaces.push_back(faces.at(curr->face->index - 1));
+	}
+	*/
 
-	adjFaces = aFaces[v->index];
-
-	return adjFaces;
+	return aFaces[v->index];
 }
 
 //Function to calculate the area of each face
