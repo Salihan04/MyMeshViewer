@@ -35,10 +35,10 @@ The Mesh Viewer is an easy to use lightweight application for displaying three d
 
 ##Screenshots
 ###1) Render as Point Cloud
-![Point Cloud](https://github.com/Salihan04/MyMeshViewer/blob/master/Screenshots/ModelPoint.PNG)
+![Point Cloud](https://github.com/Salihan04/MyMeshViewer/raw/master/Screenshots/ModelPoint.PNG)
 ###2) Render as Wireframe
-![Wireframe](https://github.com/Salihan04/MyMeshViewer/blob/master/Screenshots/ModelWireframe.PNG)
+![Wireframe](https://github.com/Salihan04/MyMeshViewer/raw/master/Screenshots/ModelWireframe.PNG)
 ###3) Render in Flat Shading Mode
-![Flat Shading](https://github.com/Salihan04/MyMeshViewer/blob/master/Screenshots/ModelFlat.PNG)
+![Flat Shading](https://github.com/Salihan04/MyMeshViewer/raw/master/Screenshots/ModelFlat.PNG)
 ###4) Render in Smooth Shading Mode
-![Smooth Shading](https://github.com/Salihan04/MyMeshViewer/blob/master/Screenshots/ModelSmooth.PNG)
+![Smooth Shading](https://github.com/Salihan04/MyMeshViewer/raw/master/Screenshots/ModelSmooth.PNG)
