@@ -39,6 +39,7 @@ static float ty = 0.0f;
 static int xform_mode = 0;
 static int obj_mode = 0;
 static int view_mode = 0;
+static float whiteLightValue = 1.0f;
 
 float minX, minY, minZ, maxX, maxY, maxZ, max;
 bool isLightEnabled = false;
@@ -94,7 +95,7 @@ vector<Normal*> perVertexNormals;
 map<pair<int, int>, HE_edge*> HE_edges;
 map<int, HE_vert*> HE_verts;
 map<int, HE_face*> HE_faces;
-map<int, vector<Face*>> adjFaces;
+map<int, vector<Face*>> aFaces;
 
 //Function prototypes
 void renderScene();

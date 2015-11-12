@@ -39,8 +39,8 @@ void renderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Setup OpenGL lighting
-	GLfloat light_position[] = { 5.0f, 1.0f, 5.0f, 0.0f };		//light position
-	GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };			//light color
+	GLfloat light_position[] = { 5.0f, 1.0f, 5.0f, 0.0f };											//light position
+	GLfloat white_light[] = { whiteLightValue, whiteLightValue, whiteLightValue, whiteLightValue };	//light color
 	GLfloat lmodel_ambient[] = { 1.0f, 0.1f, 0.1f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
@@ -218,7 +218,7 @@ void initHEMaps()
 			HE_edges[make_pair(f->v1->index, f->v2->index)] = edge;
 
 		//add face to vector of adjacent faces for v1
-		adjFaces[f->v1->index].push_back(f);
+		aFaces[f->v1->index].push_back(f);
 
 		//2nd edge
 		HE_edge* next = new HE_edge();
@@ -242,7 +242,7 @@ void initHEMaps()
 			HE_edges[make_pair(f->v2->index, f->v3->index)] = next;
 
 		//add face to vector of adjacent faces for v2
-		adjFaces[f->v2->index].push_back(f);
+		aFaces[f->v2->index].push_back(f);
 
 		//3rd edge
 		HE_edge* prev = new HE_edge();
@@ -266,7 +266,7 @@ void initHEMaps()
 			HE_edges[make_pair(f->v3->index, f->v1->index)] = prev;
 
 		//add face to vector of adjacent faces for v3
-		adjFaces[f->v3->index].push_back(f);
+		aFaces[f->v3->index].push_back(f);
 
 		//Link up 1st, 2nd, and 3rd edges with each other
 		edge->next = next;
@@ -382,7 +382,7 @@ vector<Face*> findAdjFaces(Vertex* v)
 	}
 	*/
 
-	return adjFaces[v->index];
+	return aFaces[v->index];
 }
 
 //Function to calculate the area of each face
@@ -476,7 +476,7 @@ void clearData()
 	HE_verts.clear();
 	HE_faces.clear();
 	HE_edges.clear();
-	adjFaces.clear();
+	aFaces.clear();
 }
 
 //Function to draw grid lines on the ground which is the xy plane
@@ -683,7 +683,6 @@ void drawModelFlat()
 
 	//Use flat shading mode
 	glShadeModel(GL_FLAT);
-	glEnable(GL_NORMALIZE);
 
 	glPushMatrix();
 		glScalef(1 / max, 1 / max, 1 / max);
@@ -719,7 +718,6 @@ void drawModelSmooth()
 
 	//Use flat shading mode
 	glShadeModel(GL_SMOOTH);
-	glEnable(GL_NORMALIZE);
 
 	glPushMatrix();
 		glScalef(1 / max, 1 / max, 1 / max);
@@ -883,31 +881,37 @@ void mykey(unsigned char key, int x, int y)
 		cout << "Key '1' is pressed! Draw the bimba model" << endl;
 		filename = "TestModels/" + testModels[0];
 		init(filename);
+		whiteLightValue = 1.0f * powf(10.0f, 10.0f);
 		break;
 	case '2':
 		cout << "Key '2' is pressed! Draw the bottle model" << endl;
 		filename = "TestModels/" + testModels[1];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '3':
 		cout << "Key '3' is pressed! Draw the bunny model" << endl;
 		filename = "TestModels/" + testModels[2];
 		init(filename);
+		whiteLightValue = 1.0f * powf(10.0f, 10.0f);
 		break;
 	case '4':
 		cout << "Key '4' is pressed! Draw the cap model" << endl;
 		filename = "TestModels/" + testModels[3];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '5':
 		cout << "Key '5' is pressed! Draw the eight model" << endl;
 		filename = "TestModels/" + testModels[4];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '6':
 		cout << "Key '6' is pressed! Draw the gargoyle model" << endl;
 		filename = "TestModels/" + testModels[5];
 		init(filename);
+		whiteLightValue = 1.0f;
 		break;
 	case '7':
 		cout << "Key '7' is pressed! Draw the knot model" << endl;
@@ -919,6 +923,26 @@ void mykey(unsigned char key, int x, int y)
 		cout << "Key '8' is pressed! Draw the statute model" << endl;
 		filename = "TestModels/" + testModels[7];
 		init(filename);
+		whiteLightValue = 1.0f;
+		break;
+	}
+
+	//Force the redraw function
+	glutPostRedisplay();
+}
+
+//Function to handle special keyboard input
+void mySpecial(int key, int x, int y)
+{
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+		if (whiteLightValue < 1.0f * powf(10.0f, 10.0f));
+			whiteLightValue *= 100.0f;
+		break;
+	case GLUT_KEY_DOWN:
+		if (whiteLightValue > 1.0f)
+			whiteLightValue /= 100.0f;
 		break;
 	}
 
